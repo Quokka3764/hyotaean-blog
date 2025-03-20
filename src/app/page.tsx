@@ -3,10 +3,8 @@ import PostList from "@/components/PostList";
 
 export default async function BlogPage() {
   try {
-    // 서버에서 데이터 가져오기 (lib/posts.ts 활용)
     const posts = await getAllPosts();
 
-    // 포스트가 없는 경우
     if (posts.length === 0) {
       return (
         <div className="container mx-auto px-4 py-8">
