@@ -33,11 +33,6 @@ export default function RootLayout({
         <main className="max-w-[1200px] w-full mx-auto pt-24 pb-10 px-4 flex-grow">
           {children}
         </main>
-
-        {/* 푸터 - 약간의 투명도 적용 */}
-        <footer className="w-full bg-black/30 backdrop-blur-sm border-t border-white/5 text-gray-300 p-6">
-          <div className="max-w-[1200px] mx-auto px-4">ⓒ 2025 hyotaean</div>
-        </footer>
       </body>
     </html>
   );

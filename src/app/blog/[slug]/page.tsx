@@ -19,11 +19,11 @@ export async function generateStaticParams() {
 export default async function BlogPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }> | { slug: string };
+  params: Promise<{ slug: string }> | Promise<{ slug: string }>;
 }) {
   try {
     // params를 await로 언래핑
-    const resolvedParams = await params;
+    const resolvedParams = params instanceof Promise ? await params : params;
     const slug = resolvedParams.slug;
 
     // API 호출 대신 직접 데이터 가져오기

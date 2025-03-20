@@ -2,19 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import type { PostCardProps } from "@/types/posts";
 
-// Post 인터페이스 정의
-interface Post {
-  slug: string;
-  title: string;
-  date: string;
-  excerpt?: string;
-  thumbnail?: string;
-  tags?: string[];
-}
 const defaultSrc = "/harp seal.jpg";
 
-export default function PostCard({ post }: { post: Post }) {
+export default function PostCard({ post }: { post: PostCardProps }) {
   return (
     <Link href={`/blog/${post.slug}`}>
       <div className="backdrop-blur-sm bg-white/10 border border-white/20 rounded-2xl overflow-hidden transition-all hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg max-w-[320px] mx-auto h-full">

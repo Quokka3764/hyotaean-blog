@@ -13,12 +13,10 @@ export interface Post {
 }
 
 export interface PostCardProps {
-  post: {
-    slug: string;
-    title: string;
-    date: string;
-    excerpt?: string;
-    thumbnail?: string;
-    tags?: string[];
-  };
+  slug: string;
+  title: string;
+  date: string;
+  excerpt?: string;
+  thumbnail?: string;
+  tags?: string[];
 }
