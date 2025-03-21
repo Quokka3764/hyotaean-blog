@@ -23,7 +23,7 @@ export default function MarkdownRender({ content }: { content: string }) {
         h3: ({ node, ...props }) => (
           <h3 className="text-lg font-bold my-2" {...props} />
         ),
-        p: ({ node, ...props }) => <p className="my-2" {...props} />,
+        p: ({ node, ...props }) => <p className="my-4" {...props} />,
         ul: ({ node, ...props }) => (
           <ul className="list-disc pl-5 my-2" {...props} />
         ),
