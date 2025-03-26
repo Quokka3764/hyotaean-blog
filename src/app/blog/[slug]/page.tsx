@@ -2,6 +2,7 @@ import React from "react";
 import Image from "next/image";
 import MarkdownRender from "@/components/MarkdownRender";
 import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import FadeInContent from "@/components/FadeInContent";
 
 // 정적 경로 생성을 위한 함수
 export async function generateStaticParams() {
@@ -65,8 +66,10 @@ export default async function BlogPostPage({
           )}
         </div>
 
-        {/* 마크다운 */}
-        <MarkdownRender content={content} />
+        {/* 마크다운, FadeIn 적용 */}
+        <FadeInContent>
+          <MarkdownRender content={content} />
+        </FadeInContent>
       </article>
     );
   } catch (error) {

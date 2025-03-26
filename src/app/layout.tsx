@@ -22,14 +22,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="bg-[#0f1729] bg-space-pattern min-h-screen text-gray-100">
-        {/* 네비게이션 - 글래스모피즘 적용 */}
         <nav className="w-full backdrop-blur-md bg-white/10 shadow-lg border-b border-white/10 p-4 fixed top-0 left-0 z-50">
           <div className="max-w-[1200px] w-full mx-auto px-4">
             <Navbar />
           </div>
         </nav>
-
-        {/* 메인 콘텐츠 */}
         <main className="max-w-[1200px] w-full mx-auto pt-24 pb-10 px-4 flex-grow">
           {children}
         </main>
