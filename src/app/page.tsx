@@ -1,5 +1,6 @@
 import { getAllPosts } from "@/lib/posts";
 import PostList from "@/components/PostList";
+import HeroSection from "@/components/HeroSection";
 
 export default async function BlogPage() {
   try {
@@ -30,10 +31,7 @@ export default async function BlogPage() {
 
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-white">
-          Blog
-        </h1>
-
+        <HeroSection title="Blog" />
         <PostList posts={formattedPosts} />
       </div>
     );

@@ -2,25 +2,25 @@
 
 import { ReactNode, useState } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
+import { useThemeStore } from "@/store/themeStore";
 
 interface TiltCardProps {
   children: ReactNode;
   maxTilt?: number; // 최대 기울기
   perspective?: number; // 3D 원근감
-  scale?: number; // 호버 시 확대 비율
   transitionSpeed?: number; // 트랜지션 속도 (낮을수록 빠름)
   className?: string; // 추가 스타일링을 위한 클래스
 }
 
 export default function TiltCard({
   children,
-  maxTilt = 8,
-  perspective = 1000,
-  scale = 1.02,
+  maxTilt = 10, // 기울기 증가
+  perspective = 800,
   transitionSpeed = 0.5,
   className = "",
 }: TiltCardProps) {
   const [isHovering, setIsHovering] = useState(false);
+  const { isDarkMode } = useThemeStore();
 
   // 부드러운 모션을 위해 spring 설정
   const springConfig = { damping: 15, stiffness: 150 };
@@ -43,7 +43,7 @@ export default function TiltCard({
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
 
-    // 중앙 기준 -1 ~ 1 범위로 변환, docs 참고
+    // 중앙 기준 -1 ~ 1 범위로 변환
     const centerX = x - 0.5;
     const centerY = y - 0.5;
 
@@ -63,37 +63,43 @@ export default function TiltCard({
     rotateY.set(0);
   }
 
+  // 라이트모드일 때만 테두리 스타일 추가
+  const borderStyle = !isDarkMode
+    ? "border border-gray-200 shadow-sm bg-white"
+    : "";
+
+  // 배경색 설정 - 라이트모드에서는 공간 효과가 보이지 않도록 부모와 동일한 배경색 사용
+  const bgColor = !isDarkMode ? "bg-gray-50" : "bg-[#0f1729]";
+
   return (
-    <motion.div
-      className={`relative ${className}`}
-      style={{ perspective }}
-      initial="initial"
-      whileHover="hover"
+    <div
+      className={`relative rounded-2xl overflow-hidden ${bgColor} ${className}`}
     >
       <motion.div
         style={{
-          rotateX: springRotateX,
-          rotateY: springRotateY,
+          perspective,
           transformStyle: "preserve-3d",
-          transition: `box-shadow ${transitionSpeed}s ease-out`,
         }}
-        variants={{
-          hover: { scale },
-          initial: { scale: 1 },
-        }}
-        transition={{ duration: transitionSpeed }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className="w-full h-full"
-        animate={{
-          boxShadow: isHovering
-            ? `0px 10px 20px rgba(0, 0, 0, 0.1)`
-            : `0px 0px 0px rgba(0, 0, 0, 0)`,
-        }}
       >
-        {children}
+        <motion.div
+          style={{
+            rotateX: springRotateX,
+            rotateY: springRotateY,
+            transformOrigin: "center center",
+            transformStyle: "preserve-3d",
+            transition: `all ${transitionSpeed}s ease-out`,
+          }}
+          // scale 효과 제거
+          transition={{ duration: transitionSpeed }}
+          onMouseMove={handleMouseMove}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className={`w-full h-full rounded-2xl ${borderStyle}`}
+        >
+          {children}
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }
