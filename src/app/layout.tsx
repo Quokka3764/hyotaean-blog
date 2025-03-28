@@ -7,6 +7,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 export const metadata: Metadata = {
   title: "기술 블로그",
   description: "개발 및 기술 관련 블로그",
+  icons: {
+    icon: "/my-favicon.png",
+  },
 };
 
 // viewport 설정을 별도로 export

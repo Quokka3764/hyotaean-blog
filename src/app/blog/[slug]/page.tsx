@@ -32,6 +32,26 @@ export default async function BlogPostPage({
 
     return (
       <article className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">
+            {frontmatter.title}
+          </h1>
+          <p className="text-sm text-gray-400 mt-8">
+            {new Date(frontmatter.date).toLocaleDateString()}
+          </p>
+          {frontmatter.tags && (
+            <div className="mt-8 flex flex-wrap gap-2">
+              {frontmatter.tags.map((tag: string) => (
+                <span
+                  key={tag}
+                  className="text-xs px-3 py-1 rounded-full bg-gray-800 text-gray-200"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
         {/* 썸네일 이미지 (있을 경우) */}
         {frontmatter.thumbnail && (
           <div className="mb-8 relative w-full h-64 md:h-96">
@@ -44,27 +64,6 @@ export default async function BlogPostPage({
             />
           </div>
         )}
-
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">
-            {frontmatter.title}
-          </h1>
-          <p className="text-sm text-gray-400">
-            {new Date(frontmatter.date).toLocaleDateString()}
-          </p>
-          {frontmatter.tags && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {frontmatter.tags.map((tag: string) => (
-                <span
-                  key={tag}
-                  className="text-xs px-3 py-1 rounded-full bg-gray-800 text-gray-200"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* 마크다운, FadeIn 적용 */}
         <FadeInContent>
