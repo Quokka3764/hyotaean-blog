@@ -1,4 +1,3 @@
-// src/app/api/posts/route.ts
 import { NextResponse } from "next/server";
 import { getAllPosts } from "@/lib/posts";
 

@@ -14,7 +14,7 @@ interface HeroSectionProps {
 export default function HeroSection({
   title = "Blog",
   subtitle,
-  backgroundImage,
+  // backgroundImage,
   className = "",
 }: HeroSectionProps) {
   const { isDarkMode } = useThemeStore();
