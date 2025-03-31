@@ -34,7 +34,7 @@ const CodeComponent: React.FC<CodeComponentProps> = ({
       PreTag="div"
       customStyle={{
         borderRadius: "0.25rem",
-        margin: "1rem 0",
+        margin: "1rem 0 2.5rem 0",
         fontSize: "0.875rem",
         lineHeight: "1.4",
       }}
