@@ -10,7 +10,7 @@ export default function PostCard({
   post,
   index = 0, // 인덱스 prop 추가 (기본값 0)
 }: {
-  post: BasePostCardProps & { readingTime?: number; excerpt?: string };
+  post: BasePostCardProps & { excerpt?: string };
   index?: number;
 }) {
   // 서버에서 미리 데이터 가공
@@ -44,7 +44,6 @@ export default function PostCard({
             )}
             <div className="flex justify-between items-center text-sm mt-auto">
               <span>{formattedDate}</span>
-              {post.readingTime && <span>{post.readingTime} min read</span>}
             </div>
           </div>
         </div>
