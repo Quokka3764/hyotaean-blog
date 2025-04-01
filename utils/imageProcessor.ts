@@ -25,6 +25,23 @@ function getMimeType(filePath: string): string {
 }
 
 /**
+ * 마크다운이나 썸네일에서 주어진 이미지 경로를 실제 파일 시스템상의 경로로 변환합니다.
+ * 만약 이미지 경로가 "/"로 시작하면, 이는 프로젝트의 public 폴더 내의 파일로 간주합니다.
+ * @param basePath 기준 파일 경로 (마크다운 파일의 경로)
+ * @param imagePath 마크다운에 작성된 이미지 경로
+ * @returns 실제 파일 시스템상의 이미지 절대 경로
+ */
+function resolveLocalImagePath(basePath: string, imagePath: string): string {
+  if (imagePath.startsWith("/")) {
+    // "/"로 시작하면 public 폴더 기준으로 처리 ("/"는 public 폴더의 루트를 의미)
+    const trimmed = imagePath.replace(/^\/+/, "");
+    return path.join(process.cwd(), "public", trimmed);
+  }
+  // 그 외의 경우는 마크다운 파일의 위치를 기준으로 상대 경로를 해석
+  return path.resolve(path.dirname(basePath), imagePath);
+}
+
+/**
  * 마크다운 콘텐츠에서 이미지를 추출하여 Supabase Storage에 업로드하고,
  * 이미지 참조를 업로드된 URL로 대체합니다.
  * @param markdownContent - 처리할 마크다운 콘텐츠
@@ -50,7 +67,8 @@ export async function processImages(
     // 로컬 이미지 경로인 경우에만 처리 (URL은 그대로 두기)
     if (!imagePath.startsWith("http") && !imagePath.startsWith("data:")) {
       try {
-        const fullImagePath = path.resolve(path.dirname(filePath), imagePath);
+        // 헬퍼 함수를 사용하여 실제 파일 경로를 계산
+        const fullImagePath = resolveLocalImagePath(filePath, imagePath);
         // 파일 존재 확인
         await fs.access(fullImagePath);
         // 파일 읽기
@@ -132,7 +150,8 @@ export async function uploadThumbnail(
       return thumbnailPath;
     }
 
-    const fullImagePath = path.resolve(basePath, thumbnailPath);
+    // 헬퍼 함수를 사용하여 실제 파일 경로를 계산
+    const fullImagePath = resolveLocalImagePath(basePath, thumbnailPath);
     // 파일 존재 확인
     await fs.access(fullImagePath);
     // 파일 읽기

@@ -4,7 +4,7 @@ import PostCardClient from "./PostCardClient";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
-const defaultImagePath = "/hardSeal.jpg";
+const defaultImagePath = "/harpSeal.jpg";
 
 export default function PostCard({
   post,
