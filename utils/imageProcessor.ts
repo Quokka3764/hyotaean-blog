@@ -1,4 +1,3 @@
-// src/utils/imageProcessor.ts
 import fs from "fs/promises";
 import path from "path";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -40,7 +39,6 @@ export async function processImages(
   supabase: SupabaseClient<Database>,
   bucket: string = "blog-images"
 ): Promise<string> {
-  // 마크다운에서 이미지 참조 패턴 찾기
   const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
   let processedContent = markdownContent;
   const matches = [...markdownContent.matchAll(imageRegex)];
@@ -53,10 +51,8 @@ export async function processImages(
     if (!imagePath.startsWith("http") && !imagePath.startsWith("data:")) {
       try {
         const fullImagePath = path.resolve(path.dirname(filePath), imagePath);
-
         // 파일 존재 확인
         await fs.access(fullImagePath);
-
         // 파일 읽기
         const imageBuffer = await fs.readFile(fullImagePath);
 
@@ -68,12 +64,12 @@ export async function processImages(
         )}`.replace(/^\//, "");
 
         // Supabase Storage에 업로드
-        const { data, error } = await supabase.storage
+        const { error } = await supabase.storage
           .from(bucket)
           .upload(fileName, imageBuffer, {
             contentType: getMimeType(imagePath),
             cacheControl: "3600",
-            upsert: true, // 동일 경로에 파일이 있으면 덮어쓰기
+            upsert: true,
           });
 
         if (error) {
@@ -86,10 +82,19 @@ export async function processImages(
           .from(bucket)
           .getPublicUrl(fileName);
 
+        // 환경변수 NEXT_PUBLIC_SUPABASE_STORAGE가 있다면 도메인을 치환
+        let publicUrl = urlData.publicUrl;
+        if (process.env.NEXT_PUBLIC_SUPABASE_STORAGE) {
+          publicUrl = publicUrl.replace(
+            /^https?:\/\/[^/]+/,
+            process.env.NEXT_PUBLIC_SUPABASE_STORAGE
+          );
+        }
+
         // 마크다운 내용 업데이트
         processedContent = processedContent.replace(
           fullMatch,
-          `![${altText}](${urlData.publicUrl})`
+          `![${altText}](${publicUrl})`
         );
 
         console.log(`이미지 업로드 성공: ${fileName}`);
@@ -128,18 +133,15 @@ export async function uploadThumbnail(
     }
 
     const fullImagePath = path.resolve(basePath, thumbnailPath);
-
     // 파일 존재 확인
     await fs.access(fullImagePath);
-
     // 파일 읽기
     const imageBuffer = await fs.readFile(fullImagePath);
-
     // 썸네일용 경로 생성
     const fileName = `thumbnails/${Date.now()}_${path.basename(thumbnailPath)}`;
 
     // Supabase Storage에 업로드
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, imageBuffer, {
         contentType: getMimeType(thumbnailPath),
@@ -157,8 +159,16 @@ export async function uploadThumbnail(
       .from(bucket)
       .getPublicUrl(fileName);
 
+    let publicUrl = urlData.publicUrl;
+    if (process.env.NEXT_PUBLIC_SUPABASE_STORAGE) {
+      publicUrl = publicUrl.replace(
+        /^https?:\/\/[^/]+/,
+        process.env.NEXT_PUBLIC_SUPABASE_STORAGE
+      );
+    }
+
     console.log(`썸네일 업로드 성공: ${fileName}`);
-    return urlData.publicUrl;
+    return publicUrl;
   } catch (error) {
     console.error(
       `썸네일 처리 실패 (${thumbnailPath}):`,
