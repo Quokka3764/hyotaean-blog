@@ -18,6 +18,16 @@ export interface Database {
         Insert: PostTagInsert;
         Update: Partial<PostTagInsert>;
       };
+      Functions: {
+        get_all_posts: {
+          Args: Record<string, never>; // 인자 없음
+          Returns: PostWithTags[];
+        };
+        get_post_by_slug: {
+          Args: { post_slug: string };
+          Returns: PostWithTags[];
+        };
+      };
     };
   };
 }
@@ -61,4 +71,19 @@ export interface PostTagRow {
 export interface PostTagInsert {
   post_id: string;
   tag_id: string;
+}
+
+// PostgreSQL 함수 반환 타입
+export interface PostWithTags {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  thumbnail: string | null;
+  created_at: string;
+  updated_at: string;
+  published: boolean;
+  date: string;
+  tags: string[] | null;
 }
