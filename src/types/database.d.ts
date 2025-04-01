@@ -39,6 +39,7 @@ export interface PostInsert {
   content: string;
   excerpt?: string | null;
   thumbnail?: string | null;
+  date: string;
   updated_at: string;
 }
 
