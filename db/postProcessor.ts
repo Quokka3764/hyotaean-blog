@@ -34,6 +34,7 @@ export async function postProcessor(
       content: markdownContent,
       excerpt: frontmatter.excerpt || null,
       thumbnail: frontmatter.thumbnail || null,
+      date: frontmatter.date || new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
