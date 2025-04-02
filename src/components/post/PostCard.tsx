@@ -31,7 +31,7 @@ export default function PostCard({
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px"
-              priority={true}
+              priority={index < 3}
             />
           </div>
           <div className="w-full h-px"></div>
