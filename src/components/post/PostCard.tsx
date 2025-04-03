@@ -19,30 +19,36 @@ export default function PostCard({
     locale: ko,
   });
 
-  // 서버에서 정적 콘텐츠를 렌더링, 클라이언트 부분만 전달 (이제 index도 전달)
   return (
     <div className="h-full w-full">
       <PostCardClient slug={post.slug} index={index}>
         <div className="rounded-2xl overflow-hidden h-full flex flex-col">
-          <div className="aspect-square relative w-full overflow-hidden">
+          <div
+            className="relative w-full overflow-hidden"
+            style={{ aspectRatio: "16/9" }}
+          >
             <Image
               src={thumbnailSrc}
               alt={post.title}
-              fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 320px"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               priority={index < 3}
+              quality={80}
             />
           </div>
+
           <div className="w-full h-px"></div>
-          <div className="p-5 flex flex-col flex-grow">
-            <h2 className="text-lg font-semibold mb-2 line-clamp-2">
+          <div className="p-6 flex flex-col flex-grow">
+            <h2 className="text-xl font-semibold mb-3 line-clamp-1 leading-relaxed">
               {post.title}
             </h2>
             {post.excerpt && (
-              <p className="text-sm line-clamp-2 mb-3 ">{post.excerpt}</p>
+              <p className="text-sm line-clamp-2 mb-4 leading-relaxed">
+                {post.excerpt}
+              </p>
             )}
-            <div className="flex justify-between items-center text-sm mt-auto">
+            <div className="flex justify-between items-center text-sm mt-auto pt-2">
               <span>{formattedDate}</span>
             </div>
           </div>
