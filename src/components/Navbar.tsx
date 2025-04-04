@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
-import { useThemeStore } from "@/store/themeStore";
+import { useTheme } from "next-themes";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDarkMode } = useThemeStore();
+  const { theme, systemTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
   // 클라이언트 사이드에서만 마운트
@@ -28,33 +28,42 @@ export default function Navbar() {
     };
   }, [isMenuOpen]);
 
-  // 초기 렌더링에서는 서버/클라이언트 불일치를 피하기 위해 기본 스타일 사용
-  const linkClass = isMounted
-    ? `${
-        isDarkMode ? "text-white" : "text-gray-800"
-      } hover:text-blue-500 transition-colors`
-    : "text-white hover:text-blue-300";
+  const currentTheme = isMounted
+    ? theme === "system"
+      ? systemTheme
+      : theme
+    : undefined;
+
+  const isDarkMode = isMounted && currentTheme === "dark";
+
+  // 기본 스타일
+  const defaultLinkClass = "transition-colors";
+
+  // 테마 적용 스타일 - 마운트된 후에만 적용
+  const themeSpecificClass = isMounted
+    ? isDarkMode
+      ? "text-white hover:text-blue-300"
+      : "text-gray-800 hover:text-blue-500"
+    : "text-gray-800 hover:text-blue-500"; // 기본값은 라이트 모드와 일치시킴
+
+  // 최종 스타일
+  const linkClass = `${defaultLinkClass} ${themeSpecificClass}`;
 
   return (
     <div className="flex justify-between items-center w-full">
-      <Link
-        href="/"
-        className={`text-xl font-bold ${
-          isDarkMode ? "text-white" : "text-gray-800"
-        }`}
-      >
+      <Link href="/" className={`text-xl font-bold ${linkClass}`}>
         hyotaean
       </Link>
 
       <div className="flex items-center space-x-4">
         {/* 테마 토글 버튼 */}
-        <ThemeToggle />
+        {isMounted && <ThemeToggle />}
 
         {/* 모바일 메뉴 토글 버튼 */}
         <div className="md:hidden">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={isDarkMode ? "text-white" : "text-gray-800"}
+            className={defaultLinkClass + " " + themeSpecificClass}
             aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
           >
             <motion.div
@@ -80,7 +89,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 모바일 메뉴 (반응형) */}
+      {/* 모바일 메뉴 */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -89,7 +98,11 @@ export default function Navbar() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
             className={`absolute top-16 right-0 left-0 ${
-              isDarkMode ? "bg-black/80" : "bg-white/90"
+              isMounted
+                ? isDarkMode
+                  ? "bg-black/80"
+                  : "bg-white/90"
+                : "bg-white/90"
             } backdrop-blur-md p-4 md:hidden shadow-lg`}
           >
             <div className="flex flex-col space-y-4">

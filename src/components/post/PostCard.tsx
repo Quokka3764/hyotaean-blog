@@ -8,7 +8,7 @@ const defaultImagePath = "/harpSeal.jpg";
 
 export default function PostCard({
   post,
-  index = 0, // 인덱스 prop 추가 (기본값 0)
+  index = 0,
 }: {
   post: BasePostCardProps & { excerpt?: string };
   index?: number;
@@ -33,7 +33,7 @@ export default function PostCard({
               className="object-cover"
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority={index < 3}
+              priority={true}
               quality={80}
             />
           </div>

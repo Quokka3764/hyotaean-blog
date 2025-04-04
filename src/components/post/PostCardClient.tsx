@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import TiltCard from "../TiltCard";
-import { useThemeStore } from "@/store/themeStore";
-import { useEffect, useState } from "react";
+import PostCardSkeleton from "./PostCardSkeleton";
+import { useTheme } from "next-themes";
+import { useMemo, memo, useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 interface PostCardClientProps {
@@ -12,65 +13,107 @@ interface PostCardClientProps {
   index?: number;
 }
 
-export default function PostCardClient({
-  slug,
-  children,
-  index = 0, // 기본값 0
-}: PostCardClientProps) {
-  const { isDarkMode } = useThemeStore();
-  const [isMounted, setIsMounted] = useState(false);
+function PostCardClient({ slug, children, index = 0 }: PostCardClientProps) {
+  const { theme, systemTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // 클라이언트 사이드에서만 마운트
+  // 클라이언트 사이드에서만 마운트되도록 처리
   useEffect(() => {
-    setIsMounted(true);
+    setMounted(true);
   }, []);
 
-  if (!isMounted) {
-    // 스켈레톤 UI 반환
-    return (
-      <div className="h-full">
-        <div className="rounded-2xl overflow-hidden h-full flex flex-col backdrop-blur-sm bg-white/10 border border-white/20 animate-pulse">
-          <div className="aspect-square relative w-full bg-gray-700"></div>
-          <div className="p-5 flex flex-col flex-grow">
-            <div className="h-6 w-full bg-gray-700 rounded mb-2"></div>
-            <div className="h-4 w-3/4 bg-gray-700 rounded mb-3"></div>
-            <div className="flex justify-between items-center mt-auto">
-              <div className="h-4 w-1/4 bg-gray-700 rounded"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.3,
-        delay: index * 0.1,
+  // 다크모드
+  const isDarkMode =
+    mounted && (theme === "system" ? systemTheme : theme) === "dark";
+
+  // IntersectionObserver를 위한 상태 및 참조
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  //메모이제이션
+  const cardStyles = useMemo(() => {
+    return isDarkMode
+      ? "backdrop-blur-sm bg-white/10 text-white"
+      : "group backdrop-blur-sm bg-gray-50 text-gray-800";
+  }, [isDarkMode]);
+
+  // 애니메이션 변수 메모이제이션
+  const animations = useMemo(
+    () => ({
+      initial: { opacity: 0, y: 20 },
+      animate: isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 },
+      transition: {
+        duration: 0.2,
+        delay: index * 0.05,
         ease: "easeOut",
-      }}
-      className="h-full"
-    >
-      <TiltCard
-        maxTilt={10}
-        perspective={800}
-        transitionSpeed={0.3}
+      },
+    }),
+    [index, isVisible]
+  );
+
+  // IntersectionObserver 설정
+  useEffect(() => {
+    if (!cardRef.current || !mounted) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: "50px",
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, [mounted]);
+
+  if (!mounted) {
+    return <PostCardSkeleton />;
+  }
+
+  return (
+    <div ref={cardRef} className="h-full">
+      <motion.div
+        initial={animations.initial}
+        animate={animations.animate}
+        transition={animations.transition}
         className="h-full"
+        style={{ willChange: "transform, opacity" }}
       >
-        <Link href={`/blog/${slug}`} className="block h-full">
-          <div
-            className={`${
-              isDarkMode
-                ? "backdrop-blur-sm bg-white/10 text-white"
-                : "group backdrop-blur-sm text-gray-800"
-            } rounded-2xl overflow-hidden h-full flex flex-col transition-colors`}
+        <TiltCard
+          maxTilt={10}
+          perspective={800}
+          transitionSpeed={0.3}
+          className="h-full"
+        >
+          <Link
+            href={`/blog/${slug}`}
+            className="block h-full"
+            prefetch={false}
           >
-            {children}
-          </div>
-        </Link>
-      </TiltCard>
-    </motion.div>
+            <div
+              className={`${cardStyles} rounded-2xl overflow-hidden h-full flex flex-col transition-colors`}
+            >
+              {children}
+            </div>
+          </Link>
+        </TiltCard>
+      </motion.div>
+    </div>
   );
 }
+
+export default memo(PostCardClient);

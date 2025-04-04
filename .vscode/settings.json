@@ -1,0 +1,9 @@
+{
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.validate": true,
+  "tailwindCSS.experimental.classRegex": ["class(?:Name)?=\\\"([^\\\"]*)\\\""]
+}

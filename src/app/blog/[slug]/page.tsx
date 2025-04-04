@@ -36,11 +36,11 @@ export default async function BlogPostPage({
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             {frontmatter.title}
           </h1>
-          <p className="text-sm text-gray-400 mt-8">
+          <p className="text-sm text-gray-500">
             {new Date(frontmatter.date).toLocaleDateString()}
           </p>
           {frontmatter.tags && (
-            <div className="mt-8 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {frontmatter.tags.map((tag: string) => (
                 <span
                   key={tag}
@@ -52,7 +52,8 @@ export default async function BlogPostPage({
             </div>
           )}
         </div>
-        {/* 썸네일 이미지 (있을 경우) */}
+
+        {/* 썸네일 이미지 (존재하는 경우) */}
         {frontmatter.thumbnail && (
           <div className="mb-8 relative w-full h-64 md:h-96">
             <Image
@@ -65,9 +66,11 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        {/* 마크다운, FadeIn 적용 */}
+        {/* 마크다운 내용: 텍스트는 좌측 정렬, 이미지의 사이즈를 강제로 조절 */}
         <FadeInContent>
-          <MarkdownRender content={content} />
+          <div className="max-w-full text-left [&_img]:mx-0 [&_img]:w-full [&_img]:h-auto">
+            <MarkdownRender content={content} />
+          </div>
         </FadeInContent>
       </article>
     );

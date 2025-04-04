@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useThemeStore } from "@/store/themeStore";
+import { useTheme } from "next-themes";
 
 export default function ThemeToggle() {
-  const { isDarkMode, toggleTheme } = useThemeStore();
+  const { theme, setTheme, systemTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
   // 클라이언트 사이드에서만 마운트
@@ -18,31 +18,33 @@ export default function ThemeToggle() {
     return <div className="w-14 h-7 rounded-full bg-gray-700"></div>;
   }
 
+  // system일 경우 systemTheme를 사용
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const isDark = currentTheme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
+
   return (
     <button
       onClick={toggleTheme}
       className={`relative w-14 h-7 rounded-full flex items-center justify-center ${
-        isDarkMode ? "bg-gray-700" : "bg-blue-100"
+        isDark ? "bg-gray-700" : "bg-blue-100"
       } transition-colors duration-300`}
-      aria-label={isDarkMode ? "라이트 모드로 전환" : "다크 모드로 전환"}
+      aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
     >
       {/* 슬라이딩 원 */}
       <motion.div
         className={`absolute w-5 h-5 rounded-full flex items-center justify-center ${
-          isDarkMode ? "bg-indigo-200" : "bg-yellow-400"
+          isDark ? "bg-indigo-200" : "bg-yellow-400"
         }`}
         initial={false}
-        animate={{
-          x: isDarkMode ? -12 : 12, // 중앙에서 좌우로 이동
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 500,
-          damping: 30,
-        }}
+        animate={{ x: isDark ? -12 : 12 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
       >
-        {/* 다크모드 아이콘 (달) */}
-        {isDarkMode && (
+        {/* 다크모드 아이콘 */}
+        {isDark && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"
@@ -58,9 +60,8 @@ export default function ThemeToggle() {
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         )}
-
-        {/* 라이트모드 아이콘 (해) */}
-        {!isDarkMode && (
+        {/* 라이트모드 아이콘 */}
+        {!isDark && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="12"
@@ -87,7 +88,7 @@ export default function ThemeToggle() {
       </motion.div>
 
       {/* 배경의 작은 별들 (다크모드일 때만 보임) */}
-      {isDarkMode && (
+      {isDark && (
         <>
           <motion.div
             className="absolute w-1 h-1 rounded-full bg-white"
