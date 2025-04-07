@@ -54,6 +54,8 @@ function PostCardClient({ slug, children, index = 0 }: PostCardClientProps) {
   // IntersectionObserver 설정
   useEffect(() => {
     if (!cardRef.current || !mounted) return;
+    //변수에 저장
+    const currentElement = cardRef.current;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -71,12 +73,10 @@ function PostCardClient({ slug, children, index = 0 }: PostCardClientProps) {
       }
     );
 
-    observer.observe(cardRef.current);
+    observer.observe(currentElement);
 
     return () => {
-      if (cardRef.current) {
-        observer.unobserve(cardRef.current);
-      }
+      observer.unobserve(currentElement);
     };
   }, [mounted]);
 
