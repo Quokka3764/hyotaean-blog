@@ -13,7 +13,7 @@ export async function resetFileToTemplate(filePath: string): Promise<void> {
     // 템플릿 생성: 내용은 빈 문자열, 기본 프론트매터 값 설정
     const template = matter.stringify("", {
       title: "",
-      date: new Date().toISOString(),
+      date: "2025-MM-DD hh:mm",
       thumbnail: "",
       tags: [],
       excerpt: "",
