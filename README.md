@@ -9,7 +9,7 @@ Next.js, React, TailwindCSS를 활용하여 구축한 개발자 블로그 프로
 
 ## 프로젝트 개요
 
-- **기술 스택**: Next.js 15, React 18.3, TailwindCSS 4, TypeScript
+- **기술 스택**: Next.js 15, React 18.3, TailwindCSS, TypeScript
 - **마크다운 지원**: `react-markdown`, `gray-matter`를 활용한 정적 블로그
 - **코드 하이라이팅**: `rehype-prism-plus` 적용
 - **날짜 포맷**: `date-fns` 활용
