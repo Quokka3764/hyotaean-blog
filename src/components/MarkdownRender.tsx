@@ -102,6 +102,11 @@ export default function MarkdownRender({ content }: { content: string }) {
               {children}
             </blockquote>
           ),
+          del: ({ children, ...props }) => (
+            <del className="line-through" {...props}>
+              {children}
+            </del>
+          ),
           img: ({ src, alt, ...props }) => {
             if (src && typeof src === "string" && src.startsWith("http")) {
               return (
