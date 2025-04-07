@@ -61,9 +61,14 @@ function generateFileHash(imageBuffer: Buffer): string {
 
 // 파일 경로에서 Supabase 스토리지 경로 추출 (삭제용)
 function extractStoragePath(url: string, bucket: string): string | null {
-  const regex = new RegExp(`/storage/v1/object/public/${bucket}/([^?#]+)`);
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  try {
+    const regex = new RegExp(`/storage/v1/object/public/${bucket}/([^?#]+)`);
+    const match = url.match(regex);
+    return match ? decodeURIComponent(match[1]) : null;
+  } catch (error) {
+    console.error(`스토리지 경로 추출 실패 (${url}):`, error);
+    return null;
+  }
 }
 
 // 캐시에 항목 추가 (LRU 방식 관리)
@@ -88,20 +93,20 @@ async function uploadImageToStorage(
 ): Promise<string | null> {
   try {
     // 파일 해시 생성
-    const fileHash = generateFileHash(imageBuffer);
+    const fileHash = generateFileHash(imageBuffer).substring(0, 16);
     const cacheKey = fileHash;
 
     // 캐시 확인
     if (uploadCache.has(cacheKey)) {
+      console.log(`캐시에서 이미지 URL 사용: ${uploadCache.get(cacheKey)}`);
       return uploadCache.get(cacheKey) || null;
     }
 
-    // 파일명 생성 (UUID 대신 해시 기반 - 중복 방지)
+    // 파일명 생성 (해시 기반으로 중복 방지)
     const fileExt = path.extname(originalPath).toLowerCase();
-    const fileName = `${folder}/${fileHash.substring(0, 16)}${fileExt}`.replace(
-      /^\//,
-      ""
-    );
+    const fileName = `${folder}/${fileHash}${fileExt}`.replace(/^\//, "");
+
+    console.log(`이미지 업로드 시도: ${fileName} (해시: ${fileHash})`);
 
     // Supabase Storage에 업로드 (재시도 로직 포함)
     await withRetry(
@@ -131,6 +136,7 @@ async function uploadImageToStorage(
     // 캐시에 저장
     addToCache(cacheKey, publicUrl);
 
+    console.log(`이미지 업로드 성공: ${originalPath} -> ${publicUrl}`);
     return publicUrl;
   } catch (error) {
     console.error(`이미지 업로드 실패 (${originalPath}):`, error);
@@ -149,6 +155,8 @@ async function processImages(
   let processedContent = markdownContent;
   const matches = [...markdownContent.matchAll(imageRegex)];
 
+  console.log(`마크다운에서 이미지 ${matches.length}개 발견`);
+
   // 동시성 제한을 위한 배치 처리 (한 번에 최대 5개 이미지 처리)
   const BATCH_SIZE = 5;
   for (let i = 0; i < matches.length; i += BATCH_SIZE) {
@@ -166,6 +174,7 @@ async function processImages(
           imagePath.startsWith("data:") ||
           isSupabaseStorageUrl(imagePath)
         ) {
+          console.log(`이미 처리된 이미지 URL 유지: ${imagePath}`);
           return { fullMatch, newUrl: imagePath, altText };
         }
 
@@ -188,7 +197,7 @@ async function processImages(
           );
 
           if (publicUrl) {
-            console.log(`이미지 업로드 성공: ${imagePath} -> ${publicUrl}`);
+            console.log(`이미지 처리 성공: ${imagePath} -> ${publicUrl}`);
             return { fullMatch, newUrl: publicUrl, altText };
           }
         } catch (error) {
@@ -211,7 +220,7 @@ async function processImages(
   return processedContent;
 }
 
-// 썸네일 교체 시 이전 이미지 삭제
+// 썸네일 이미지를 Supabase Storage에서 삭제
 async function deleteOldThumbnail(
   oldThumbnailUrl: string | null,
   supabase: SupabaseClient<Database>,
@@ -223,10 +232,13 @@ async function deleteOldThumbnail(
 
   const storagePath = extractStoragePath(oldThumbnailUrl, bucket);
   if (!storagePath) {
+    console.log(`스토리지 경로 추출 실패: ${oldThumbnailUrl}`);
     return;
   }
 
   try {
+    console.log(`이전 썸네일 삭제 시도: ${storagePath}`);
+
     await withRetry(
       async () => {
         const { error } = await supabase.storage
@@ -239,6 +251,7 @@ async function deleteOldThumbnail(
       3,
       1000
     );
+
     console.log(`이전 썸네일 삭제 성공: ${storagePath}`);
   } catch (error) {
     console.error(`이전 썸네일 삭제 실패 (${storagePath}):`, error);
@@ -255,8 +268,18 @@ async function uploadThumbnail(
 ): Promise<string | null> {
   if (!thumbnailPath) return null;
 
-  // 이미 Supabase URL이고 수정되지 않은 경우 (경로가 같으면) 기존 URL 유지
+  console.log(`썸네일 처리 시작: ${thumbnailPath}`);
+  console.log(`이전 썸네일 URL: ${oldThumbnailUrl || "없음"}`);
+
+  // 이미 Supabase URL이면 확인
   if (isSupabaseStorageUrl(thumbnailPath)) {
+    console.log(`이미 Supabase URL인 썸네일 유지: ${thumbnailPath}`);
+    return thumbnailPath;
+  }
+
+  // HTTP URL이면 그대로 사용
+  if (thumbnailPath.startsWith("http") || thumbnailPath.startsWith("https")) {
+    console.log(`외부 URL 썸네일 유지: ${thumbnailPath}`);
     return thumbnailPath;
   }
 
@@ -267,24 +290,27 @@ async function uploadThumbnail(
     await fs.access(fullImagePath);
     const imageBuffer = await fs.readFile(fullImagePath);
 
-    // 썸네일 폴더 사용
-    const folderPath = "thumbnails";
-
-    // 업로드 전 기존 썸네일 해시 확인
+    // 이미지 해시 계산
     const newImageHash = generateFileHash(imageBuffer).substring(0, 16);
+    console.log(`새 썸네일 해시: ${newImageHash}`);
 
     // 기존 URL이 있고 같은 이미지인지 확인 (URL에 해시가 포함되어 있는지)
     if (oldThumbnailUrl && isSupabaseStorageUrl(oldThumbnailUrl)) {
+      // 이미지 내용이 변경되었는지 확인 (URL에서 해시값 추출)
       if (oldThumbnailUrl.includes(newImageHash)) {
-        console.log("동일한 썸네일 이미지 사용: 기존 URL 유지");
+        console.log("동일한 썸네일 이미지 감지: 기존 URL 유지");
         return oldThumbnailUrl;
       }
 
       // 이미지가 변경된 경우 기존 이미지 삭제
+      console.log(
+        "썸네일 이미지 변경 감지: 이전 이미지 삭제 후 새 이미지 업로드"
+      );
       await deleteOldThumbnail(oldThumbnailUrl, supabase, bucket);
     }
 
     // 새 이미지 업로드
+    const folderPath = "thumbnails";
     return await uploadImageToStorage(
       thumbnailPath,
       imageBuffer,
@@ -303,4 +329,5 @@ export default {
   processImages,
   uploadThumbnail,
   isSupabaseStorageUrl,
+  deleteOldThumbnail,
 };
