@@ -60,12 +60,12 @@ export default function MarkdownRender({ content }: { content: string }) {
             </h1>
           ),
           h2: ({ children, ...props }) => (
-            <h2 className="text-2xl font-bold my-3" {...props}>
+            <h2 className="text-2xl font-bold my-4" {...props}>
               {children}
             </h2>
           ),
           h3: ({ children, ...props }) => (
-            <h3 className="text-xl font-bold my-2" {...props}>
+            <h3 className="text-xl font-bold my-4" {...props}>
               {children}
             </h3>
           ),
@@ -85,7 +85,7 @@ export default function MarkdownRender({ content }: { content: string }) {
             </ol>
           ),
           li: ({ children, ...props }) => (
-            <li className="ml-2 my-1" {...props}>
+            <li className="ml-2 my-2" {...props}>
               {children}
             </li>
           ),
@@ -96,7 +96,7 @@ export default function MarkdownRender({ content }: { content: string }) {
           ),
           blockquote: ({ children, ...props }) => (
             <blockquote
-              className="border-l-4 border-gray-200 pl-4 my-2 italic"
+              className="border-l-4 border-gray-200 pl-4 my-8 italic"
               {...props}
             >
               {children}

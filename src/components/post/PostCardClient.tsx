@@ -117,3 +117,96 @@ function PostCardClient({ slug, children, index = 0 }: PostCardClientProps) {
 }
 
 export default memo(PostCardClient);
+
+// "use client";
+
+// import Link from "next/link";
+// import PostCardSkeleton from "./PostCardSkeleton";
+// import { useTheme } from "next-themes";
+// import { useMemo, memo, useRef, useEffect, useState } from "react";
+
+// interface PostCardClientProps {
+//   slug: string;
+//   children: React.ReactNode;
+//   index?: number;
+// }
+
+// function PostCardClient({ slug, children, index = 0 }: PostCardClientProps) {
+//   const { theme, systemTheme } = useTheme();
+//   const [mounted, setMounted] = useState(false);
+
+//   // 클라이언트 사이드에서만 마운트되도록 처리
+//   useEffect(() => {
+//     setMounted(true);
+//   }, []);
+
+//   // 다크모드 판단
+//   const isDarkMode =
+//     mounted && (theme === "system" ? systemTheme : theme) === "dark";
+
+//   // IntersectionObserver를 위한 상태 및 참조
+//   const [isVisible, setIsVisible] = useState(false);
+//   const cardRef = useRef<HTMLDivElement>(null);
+
+//   // 다크모드에 따른 스타일 클래스
+//   const cardStyles = useMemo(() => {
+//     return isDarkMode
+//       ? "backdrop-blur-sm bg-white/10 text-white"
+//       : "group backdrop-blur-sm bg-gray-50 text-gray-800";
+//   }, [isDarkMode]);
+
+//   // IntersectionObserver 설정
+//   useEffect(() => {
+//     if (!cardRef.current || !mounted) return;
+
+//     const observer = new IntersectionObserver(
+//       (entries) => {
+//         entries.forEach((entry) => {
+//           if (entry.isIntersecting) {
+//             setIsVisible(true);
+//             observer.unobserve(entry.target);
+//           }
+//         });
+//       },
+//       {
+//         root: null,
+//         rootMargin: "50px",
+//         threshold: 0.1,
+//       }
+//     );
+
+//     observer.observe(cardRef.current);
+
+//     return () => {
+//       if (cardRef.current) {
+//         observer.unobserve(cardRef.current);
+//       }
+//     };
+//   }, [mounted]);
+
+//   if (!mounted) {
+//     return <PostCardSkeleton />;
+//   }
+
+//   return (
+//     <div ref={cardRef} className="h-full">
+//       <div
+//         className={`h-full ${isVisible ? "animate-fade-in-up" : ""}`}
+//         style={{
+//           willChange: "transform, opacity",
+//           animationDelay: `${index * 0.05}s`,
+//         }}
+//       >
+//         <Link href={`/blog/${slug}`} className="block h-full" prefetch={false}>
+//           <div
+//             className={`${cardStyles} rounded-2xl overflow-hidden h-full flex flex-col transition-colors`}
+//           >
+//             {children}
+//           </div>
+//         </Link>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default memo(PostCardClient);
