@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import { createHash } from "crypto";
-import { v4 as uuidv4 } from "uuid";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
 import { withRetry } from "../utils/retry";
@@ -46,9 +45,25 @@ function transformStorageUrl(url: string): string {
   return url;
 }
 
-// 파일 내용 해시를 사용한 캐시 키 생성
-function generateCacheKey(imageBuffer: Buffer): string {
+// Supabase URL 패턴 확인
+function isSupabaseStorageUrl(url: string): boolean {
+  // Supabase Storage URL 패턴 확인
+  return (
+    url.includes("/storage/v1/object/public/") ||
+    url.includes(".supabase.co/storage/v1/")
+  );
+}
+
+// 파일 내용 해시 생성
+function generateFileHash(imageBuffer: Buffer): string {
   return createHash("sha256").update(imageBuffer).digest("hex");
+}
+
+// 파일 경로에서 Supabase 스토리지 경로 추출 (삭제용)
+function extractStoragePath(url: string, bucket: string): string | null {
+  const regex = new RegExp(`/storage/v1/object/public/${bucket}/([^?#]+)`);
+  const match = url.match(regex);
+  return match ? match[1] : null;
 }
 
 // 캐시에 항목 추가 (LRU 방식 관리)
@@ -72,18 +87,21 @@ async function uploadImageToStorage(
   bucket: string
 ): Promise<string | null> {
   try {
-    // 해시 기반 캐시 키 생성
-    const cacheKey = generateCacheKey(imageBuffer);
+    // 파일 해시 생성
+    const fileHash = generateFileHash(imageBuffer);
+    const cacheKey = fileHash;
 
     // 캐시 확인
     if (uploadCache.has(cacheKey)) {
       return uploadCache.get(cacheKey) || null;
     }
 
-    // 고유 파일명 생성 (UUID + 원본 파일명)
-    const fileName = `${folder}/${uuidv4()}_${path.basename(
-      originalPath
-    )}`.replace(/^\//, "");
+    // 파일명 생성 (UUID 대신 해시 기반 - 중복 방지)
+    const fileExt = path.extname(originalPath).toLowerCase();
+    const fileName = `${folder}/${fileHash.substring(0, 16)}${fileExt}`.replace(
+      /^\//,
+      ""
+    );
 
     // Supabase Storage에 업로드 (재시도 로직 포함)
     await withRetry(
@@ -93,7 +111,7 @@ async function uploadImageToStorage(
           .upload(fileName, imageBuffer, {
             contentType: getMimeType(originalPath),
             cacheControl: "3600",
-            upsert: true,
+            upsert: true, // 같은 경로면 덮어쓰기
           });
 
         if (error) throw error;
@@ -141,11 +159,12 @@ async function processImages(
       batch.map(async (match) => {
         const [fullMatch, altText, imagePath] = match;
 
-        // 이미 외부 URL이면 처리하지 않음
+        // 이미 외부 URL이거나 Supabase URL인 경우 처리하지 않음
         if (
           imagePath.startsWith("http") ||
           imagePath.startsWith("https") ||
-          imagePath.startsWith("data:")
+          imagePath.startsWith("data:") ||
+          isSupabaseStorageUrl(imagePath)
         ) {
           return { fullMatch, newUrl: imagePath, altText };
         }
@@ -192,20 +211,56 @@ async function processImages(
   return processedContent;
 }
 
-// 썸네일 이미지를 Supabase Storage에 업로드
+// 썸네일 교체 시 이전 이미지 삭제
+async function deleteOldThumbnail(
+  oldThumbnailUrl: string | null,
+  supabase: SupabaseClient<Database>,
+  bucket: string = "blog-images"
+): Promise<void> {
+  if (!oldThumbnailUrl || !isSupabaseStorageUrl(oldThumbnailUrl)) {
+    return;
+  }
+
+  const storagePath = extractStoragePath(oldThumbnailUrl, bucket);
+  if (!storagePath) {
+    return;
+  }
+
+  try {
+    await withRetry(
+      async () => {
+        const { error } = await supabase.storage
+          .from(bucket)
+          .remove([storagePath]);
+
+        if (error) throw error;
+      },
+      `이전 썸네일 삭제 (${storagePath})`,
+      3,
+      1000
+    );
+    console.log(`이전 썸네일 삭제 성공: ${storagePath}`);
+  } catch (error) {
+    console.error(`이전 썸네일 삭제 실패 (${storagePath}):`, error);
+  }
+}
+
+// 썸네일 이미지를 Supabase Storage에 업로드 (기존 이미지 관리 포함)
 async function uploadThumbnail(
   thumbnailPath: string,
   basePath: string,
   supabase: SupabaseClient<Database>,
+  oldThumbnailUrl: string | null = null,
   bucket: string = "blog-images"
 ): Promise<string | null> {
   if (!thumbnailPath) return null;
 
-  // 이미 http/https URL이면 업로드 불필요
-  if (thumbnailPath.startsWith("http") || thumbnailPath.startsWith("https")) {
+  // 이미 Supabase URL이고 수정되지 않은 경우 (경로가 같으면) 기존 URL 유지
+  if (isSupabaseStorageUrl(thumbnailPath)) {
     return thumbnailPath;
   }
 
+  // 로컬 파일 경로인 경우에만 처리
   try {
     // 실제 파일 경로 계산 및 파일 읽기
     const fullImagePath = resolveLocalImagePath(basePath, thumbnailPath);
@@ -215,7 +270,21 @@ async function uploadThumbnail(
     // 썸네일 폴더 사용
     const folderPath = "thumbnails";
 
-    // 공통 업로드 함수 사용
+    // 업로드 전 기존 썸네일 해시 확인
+    const newImageHash = generateFileHash(imageBuffer).substring(0, 16);
+
+    // 기존 URL이 있고 같은 이미지인지 확인 (URL에 해시가 포함되어 있는지)
+    if (oldThumbnailUrl && isSupabaseStorageUrl(oldThumbnailUrl)) {
+      if (oldThumbnailUrl.includes(newImageHash)) {
+        console.log("동일한 썸네일 이미지 사용: 기존 URL 유지");
+        return oldThumbnailUrl;
+      }
+
+      // 이미지가 변경된 경우 기존 이미지 삭제
+      await deleteOldThumbnail(oldThumbnailUrl, supabase, bucket);
+    }
+
+    // 새 이미지 업로드
     return await uploadImageToStorage(
       thumbnailPath,
       imageBuffer,
@@ -233,4 +302,5 @@ async function uploadThumbnail(
 export default {
   processImages,
   uploadThumbnail,
+  isSupabaseStorageUrl,
 };
