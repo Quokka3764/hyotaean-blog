@@ -1,9 +1,8 @@
 "use client";
 
-import { useThemeStore } from "@/store/themeStore";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-//추후 확장할거임 ㅠㅠ
 interface HeroSectionProps {
   title?: string;
   subtitle?: string;
@@ -14,35 +13,52 @@ interface HeroSectionProps {
 export default function HeroSection({
   title = "Blog",
   subtitle,
-  // backgroundImage,
   className = "",
 }: HeroSectionProps) {
-  const { isDarkMode } = useThemeStore();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // 마운트 상태 확인
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // 테마에 따른 클래스 동적 결정
-  const titleClassName = mounted
-    ? `text-3xl md:text-4xl font-bold mb-8 text-center ${
-        isDarkMode ? "text-gray-200" : "text-gray-800"
-      }`
-    : "text-3xl md:text-4xl font-bold mb-8 text-center opacity-0";
+  // 서버 렌더링 시 또는 클라이언트 하이드레이션 전에는 기본 스타일 사용
+  if (!mounted) {
+    return (
+      <div className={`w-full py-8 ${className}`}>
+        <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="text-lg text-center max-w-3xl mx-auto mb-6 text-gray-600">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    );
+  }
 
-  const subtitleClassName = mounted
-    ? `text-lg text-center max-w-3xl mx-auto mb-6 ${
-        isDarkMode ? "text-gray-300" : "text-gray-600"
-      }`
-    : "text-lg text-center max-w-3xl mx-auto mb-6 opacity-0";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <div className={`w-full py-8 ${className}`}>
-      <h1 className={titleClassName}>{title}</h1>
+      <h1
+        className={`text-3xl md:text-4xl font-bold mb-8 text-center ${
+          isDark ? "text-gray-200" : "text-gray-800"
+        }`}
+      >
+        {title}
+      </h1>
 
-      {subtitle && <p className={subtitleClassName}>{subtitle}</p>}
+      {subtitle && (
+        <p
+          className={`text-lg text-center max-w-3xl mx-auto mb-6 ${
+            isDark ? "text-gray-300" : "text-gray-600"
+          }`}
+        >
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }
