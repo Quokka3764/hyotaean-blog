@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import "../styles/globals.css";
 import Navbar from "@/components/Navbar";
 import ThemeProvider from "@/components/ThemeProvider";
+import SpaceBackground from "@/components/background/SpaceBackground";
 
 export const metadata: Metadata = {
   title: "기술 블로그",
@@ -24,9 +25,13 @@ export default function RootLayout({
   return (
     <html lang="ko" suppressHydrationWarning>
       <head />
-      <body className="min-h-screen transition-colors duration-300 bg-light-bg text-light-text dark:bg-dark-bg dark:bg-space-pattern dark:text-dark-text">
+      <body className="min-h-screen transition-colors duration-300">
         <ThemeProvider>
-          <nav className="w-full backdrop-blur-md shadow-lg fixed top-0 left-0 z-50 p-4  bg-white/20 border-gray-200">
+          <div className="fixed inset-0 -z-20 overflow-hidden">
+            <SpaceBackground />
+          </div>
+
+          <nav className="w-full backdrop-blur-md shadow-lg fixed top-0 left-0 z-50 p-4 bg-white/20 dark:bg-black/20 border-gray-200">
             <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6">
               <Navbar />
             </div>
