@@ -1,6 +1,6 @@
 import { getAllPosts } from "@/lib/posts";
 import PostList from "@/components/post/PostList";
-import HeroSection from "@/components/HeroSection";
+import HeroSection from "@/components/hero/HeroSection";
 
 export default async function BlogPage() {
   try {
