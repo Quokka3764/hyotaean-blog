@@ -31,7 +31,7 @@ Next.js, React, TailwindCSS를 활용하여 구축한 개발자 블로그 프로
 
 | 패키지                 | 설명             |
 | ---------------------- | ---------------- |
-| `tailwindcss`          | TailwindCSS 4    |
+| `tailwindcss`          | TailwindCSS 3.3.5 |
 | `@tailwindcss/postcss` | PostCSS 플러그인 |
 
 ### **마크다운 처리**
