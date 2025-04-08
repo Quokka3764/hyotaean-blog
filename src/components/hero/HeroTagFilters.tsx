@@ -2,13 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-
-interface HeroTagFiltersProps {
-  isDark: boolean;
-  tags: string[];
-  selectedTagIndex: number;
-  setSelectedTagIndex: (index: number) => void;
-}
+import { HeroTagFiltersProps } from "./types";
 
 function HeroTagFilters({
   isDark,

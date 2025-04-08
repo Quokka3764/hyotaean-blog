@@ -20,3 +20,16 @@ export interface HeroMainTitleClientProps {
   textContent: TextContent;
   gradients: Gradients;
 }
+
+export interface HeroTagFiltersProps {
+  isDark: boolean;
+  tags: string[];
+  selectedTagIndex: number;
+  setSelectedTagIndex: (index: number) => void;
+}
+
+export interface HeroTaglineProps {
+  isDark: boolean;
+  taglines: string[];
+  currentTaglineIndex: number;
+}

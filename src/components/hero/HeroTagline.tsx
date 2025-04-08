@@ -2,12 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-
-interface HeroTaglineProps {
-  isDark: boolean;
-  taglines: string[];
-  currentTaglineIndex: number;
-}
+import { HeroTaglineProps } from "./types";
 
 function HeroTagline({
   isDark,
