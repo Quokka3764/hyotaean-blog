@@ -2,7 +2,7 @@ import {
   getEnvironmentVariables,
   createSupabaseClient,
 } from "../src/lib/supabaseClient";
-import { postProcessor } from "../src/services/postService";
+import { postService } from "@/services/postService";
 import {
   findChangedMarkdownFiles,
   findAllMarkdownFiles,
@@ -36,7 +36,7 @@ async function processMarkdownFiles(): Promise<void> {
   for (const file of files) {
     try {
       await withRetry(
-        () => postProcessor(file, supabase),
+        () => postService(file, supabase),
         `파일 처리 ${file}`,
         3,
         1000

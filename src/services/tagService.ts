@@ -1,5 +1,3 @@
-// scripts/db/tagProcessor.ts
-
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
 
@@ -11,7 +9,7 @@ const BATCH_SIZE = 5;
  * @param tags - 태그 이름 배열
  * @param supabase - Supabase 클라이언트 인스턴스
  */
-export async function processPostTags(
+export async function tagService(
   postSlug: string,
   tags: string[],
   supabase: SupabaseClient<Database>
