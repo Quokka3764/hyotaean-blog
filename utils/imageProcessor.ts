@@ -324,10 +324,10 @@ async function uploadThumbnail(
   }
 }
 
-// 외부로 내보낼 API 객체로 묶기
 export default {
   processImages,
   uploadThumbnail,
   isSupabaseStorageUrl,
   deleteOldThumbnail,
+  extractStoragePath,
 };

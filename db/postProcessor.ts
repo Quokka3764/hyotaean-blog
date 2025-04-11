@@ -9,6 +9,14 @@ import { resetFileToTemplate } from "../utils/fileReset";
 import { processPostTags } from "./tagProcessor";
 import imageProcessor from "../utils/imageProcessor";
 
+// Supabase 이미지 URL 추출 함수
+function extractSupabaseImageUrls(content: string): string[] {
+  const supabaseUrlPattern =
+    /https:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\/blog-images\/[^)\s"]*/g;
+  const matches = content.match(supabaseUrlPattern);
+  return matches ? Array.from(new Set(matches)) : [];
+}
+
 export async function postProcessor(
   filePath: string,
   supabase: SupabaseClient<Database>
@@ -30,12 +38,62 @@ export async function postProcessor(
       .eq("slug", slug)
       .maybeSingle();
 
+    // 기존 포스트에서 이미지 URL 추출 (있는 경우)
+    const oldImageUrls = existingPost?.content
+      ? extractSupabaseImageUrls(existingPost.content)
+      : [];
+
+    if (oldImageUrls.length > 0) {
+      console.log(`기존 포스트에서 이미지 ${oldImageUrls.length}개 발견`);
+    }
+
     // 이미지 처리: 마크다운 본문에 있는 로컬 이미지 업로드 후 URL 대체
     const processedContent = await processImages(
       markdownContent,
       filePath,
       supabase
     );
+
+    // 새롭게 처리된 content에서 Supabase 이미지 URL을 추출
+    const newImageUrls = extractSupabaseImageUrls(processedContent);
+
+    if (newImageUrls.length > 0) {
+      console.log(`처리된 콘텐츠에서 이미지 ${newImageUrls.length}개 발견`);
+    }
+
+    // 기존 이미지 중 새 content에 없는 이미지는 삭제 대상
+    const unusedImageUrls = oldImageUrls.filter(
+      (oldUrl) => !newImageUrls.includes(oldUrl)
+    );
+
+    // 실제 삭제 로직 (Supabase remove)
+    if (unusedImageUrls.length > 0) {
+      console.log(`더 이상 사용되지 않는 이미지: ${unusedImageUrls.length}개`);
+      const storagePaths: string[] = [];
+
+      for (const url of unusedImageUrls) {
+        const sp = imageProcessor.extractStoragePath(url, "blog-images");
+        if (sp) storagePaths.push(sp);
+      }
+
+      if (storagePaths.length > 0) {
+        try {
+          const { error: removeError } = await supabase.storage
+            .from("blog-images")
+            .remove(storagePaths);
+
+          if (removeError) {
+            console.error("사용되지 않는 이미지 삭제 오류:", removeError);
+          } else {
+            console.log(
+              `사용되지 않는 이미지 ${storagePaths.length}개 삭제 완료`
+            );
+          }
+        } catch (error) {
+          console.error("이미지 삭제 중 오류 발생:", error);
+        }
+      }
+    }
 
     // 썸네일 처리: 기존 썸네일 URL 전달하여 변경 여부 확인
     let processedThumbnail: string | null = null;
