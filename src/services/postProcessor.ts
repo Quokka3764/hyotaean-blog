@@ -7,7 +7,7 @@ import {
 } from "../utils/markdownParser";
 import { resetFileToTemplate } from "../utils/fileReset";
 import { processPostTags } from "./tagProcessor";
-import imageProcessor from "../utils/imageProcessor";
+import imageProcessor from "./imageProcessor";
 
 // Supabase 이미지 URL 추출 함수
 function extractSupabaseImageUrls(content: string): string[] {

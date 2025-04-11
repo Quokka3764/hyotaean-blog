@@ -1,5 +1,3 @@
-// scripts/utils/markdownParser.ts
-
 import matter from "gray-matter";
 import slugify from "slugify";
 import path from "path";

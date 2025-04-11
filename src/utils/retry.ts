@@ -1,5 +1,3 @@
-// scripts/utils/retry.ts
-
 /**
  * 지정한 시간(ms) 동안 대기하는 함수
  * @param ms 대기 시간 (밀리초)

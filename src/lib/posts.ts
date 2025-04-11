@@ -1,5 +1,5 @@
 import { PostgrestError } from "@supabase/supabase-js";
-import { getSupabaseClient } from "../../db/supabaseClient";
+import { getSupabaseClient } from "./supabaseClient";
 import { PostWithTags } from "@/types/database";
 import { cache } from "react";
 

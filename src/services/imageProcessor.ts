@@ -3,7 +3,7 @@ import path from "path";
 import { createHash } from "crypto";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
-import { withRetry } from "../utils/retry";
+import { withRetry } from "@/utils/retry";
 
 // MIME 타입 매핑
 const MIME_TYPES: Record<string, string> = {

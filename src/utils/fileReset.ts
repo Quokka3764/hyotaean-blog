@@ -1,5 +1,3 @@
-// scripts/utils/fileReset.ts
-
 import fs from "fs/promises";
 import matter from "gray-matter";
 

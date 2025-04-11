@@ -3,13 +3,13 @@
 import {
   getEnvironmentVariables,
   createSupabaseClient,
-} from "../db/supabaseClient";
-import { postProcessor } from "../db/postProcessor";
+} from "../src/lib/supabaseClient";
+import { postProcessor } from "../src/services/postProcessor";
 import {
   findChangedMarkdownFiles,
   findAllMarkdownFiles,
-} from "../utils/fileUtils";
-import { withRetry } from "../utils/retry";
+} from "../src/utils/fileUtils";
+import { withRetry } from "../src/utils/retry";
 
 async function processMarkdownFiles(): Promise<void> {
   console.log("마크다운 파일 처리 시작...");
