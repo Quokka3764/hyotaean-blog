@@ -1,10 +1,8 @@
-// scripts/process-markdown.ts
-
 import {
   getEnvironmentVariables,
   createSupabaseClient,
 } from "../src/lib/supabaseClient";
-import { postProcessor } from "../src/services/postProcessor";
+import { postProcessor } from "../src/services/postService";
 import {
   findChangedMarkdownFiles,
   findAllMarkdownFiles,

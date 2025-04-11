@@ -6,8 +6,8 @@ import {
   generateValidSlug,
 } from "../utils/markdownParser";
 import { resetFileToTemplate } from "../utils/fileReset";
-import { processPostTags } from "./tagProcessor";
-import imageProcessor from "./imageProcessor";
+import { processPostTags } from "./tagService";
+import imageProcessor from "./imageService";
 
 // Supabase 이미지 URL 추출 함수
 function extractSupabaseImageUrls(content: string): string[] {
