@@ -62,14 +62,13 @@ function generateFileHash(imageBuffer: Buffer): string {
 // 파일 경로에서 Supabase 스토리지 경로 추출 (삭제용)
 function extractStoragePath(url: string, bucket: string): string | null {
   try {
-    // bucket 이름 이후의 경로를 추출하는 정규식 패턴
-    const regex = new RegExp(`/storage/v1/object/public/${bucket}/([^?#]+)`);
+    const regex = new RegExp(`/storage/v1/object/public/${bucket}/+([^?#]+)`);
     const match = url.match(regex);
 
     if (!match) return null;
 
-    // URL 디코딩 적용 - 특수 문자나 유니코드 문자가 있을 경우 처리
-    return decodeURIComponent(match[1]);
+    // 경로에서 선행 슬래시 제거 및 정규화
+    return decodeURIComponent(match[1]).replace(/^\/+/, "");
   } catch (error) {
     return null;
   }
