@@ -1,6 +1,6 @@
 import path from "path";
 import { createHash } from "crypto";
-import { format, parse } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 
 // MIME 타입 매핑
 export const MIME_TYPES: Record<string, string> = {
@@ -38,6 +38,13 @@ export function generateFileHash(imageBuffer: Buffer): string {
 
 // 날짜 문자열에서 폴더명 생성 (YYYYMMDD)
 export function formatDateFolder(dateString: string): string {
-  const parsedDate = parse(dateString, "yyyy-MM-dd HH:mm", new Date());
+  let parsedDate;
+  if (dateString.includes("T")) {
+    // ISO 형식인 경우
+    parsedDate = parseISO(dateString);
+  } else {
+    // 템플릿 형식인 경우, 예: "2025-04-11 21:17"
+    parsedDate = parse(dateString, "yyyy-MM-dd HH:mm", new Date());
+  }
   return format(parsedDate, "yyyyMMdd");
 }
