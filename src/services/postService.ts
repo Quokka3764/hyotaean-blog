@@ -1,4 +1,5 @@
 import fs from "fs/promises";
+import { format } from "date-fns";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database, PostInsert } from "@/types/database";
 import {
@@ -33,8 +34,11 @@ export async function postService(
       .maybeSingle();
 
     // 이미지 처리: 마크다운 본문에 있는 로컬 이미지 업로드 후 URL 대체
+
     const postDate =
-      existingPost?.date ?? frontmatter.date ?? new Date().toISOString();
+      existingPost?.date ??
+      frontmatter.date ??
+      format(new Date(), "yyyy-MM-dd HH:mm");
     const processedContent = await uploadContentImages(
       markdownContent,
       filePath,
