@@ -5,14 +5,14 @@ import { Database, PostInsert } from "@/types/database";
 import {
   parseMarkdownContent,
   generateValidSlug,
-} from "../utils/markdownParser";
-import { resetFileToTemplate } from "../utils/fileReset";
-import { tagService } from "./tagService";
+} from "../../utils/markdownParser";
+import { resetFileToTemplate } from "../../utils/fileReset";
+import { tagService } from "../tagService";
 import {
   uploadContentImages,
   cleanupUnusedImages,
   uploadThumbnail,
-} from "./image";
+} from "../image";
 
 export async function postService(
   filePath: string,

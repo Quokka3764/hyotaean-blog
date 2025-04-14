@@ -1,10 +1,10 @@
 import { PostgrestError } from "@supabase/supabase-js";
 import { getSupabaseClient } from "./supabaseClient";
 import { PostWithTags } from "@/types/database";
-import { cache } from "react";
+// import { cache } from "react";
 
-// 모든 포스트 정보 가져오기 (캐싱 적용)
-export const getAllPosts = cache(async () => {
+// 모든 포스트 정보 가져오기
+export const getAllPosts = async () => {
   try {
     const supabase = getSupabaseClient();
 
@@ -31,7 +31,7 @@ export const getAllPosts = cache(async () => {
     console.error("포스트 목록 가져오기 오류:", error);
     throw error;
   }
-});
+};
 
 // 특정 슬러그의 포스트 정보 가져오기
 export async function getPostBySlug(slug: string) {

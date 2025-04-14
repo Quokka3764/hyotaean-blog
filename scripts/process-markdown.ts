@@ -2,7 +2,7 @@ import {
   getEnvironmentVariables,
   createSupabaseClient,
 } from "../src/lib/supabaseClient";
-import { postService } from "@/services/postService";
+import { postService } from "@/services/posts/postService";
 import {
   findChangedMarkdownFiles,
   findAllMarkdownFiles,
