@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "blog-edit": "npx tsx src/services/posts/listPosts.ts"
+    "edit": "npx tsx src/services/posts/listPosts.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
