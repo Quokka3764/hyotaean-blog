@@ -3,6 +3,7 @@ import type { PostCardProps as BasePostCardProps } from "@/types/posts";
 import PostCardClient from "./PostCardClient";
 import { formatInTimeZone } from "date-fns-tz";
 import { ko } from "date-fns/locale";
+import { parseISO } from "date-fns";
 
 const defaultImagePath = "/harpSeal.jpg";
 
@@ -13,15 +14,14 @@ export default function PostCard({
   post: BasePostCardProps & { excerpt?: string };
   index?: number;
 }) {
-  // 서버에서 미리 데이터 가공
   const thumbnailSrc = post.thumbnail || defaultImagePath;
+
   const formattedDate = formatInTimeZone(
-    new Date(post.date),
+    parseISO(post.date),
     "Asia/Seoul",
     "yyyy년 MM월 dd일",
     { locale: ko }
   );
-
   return (
     <div className="h-full w-full">
       <PostCardClient slug={post.slug} index={index}>
