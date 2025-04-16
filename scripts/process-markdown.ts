@@ -7,7 +7,7 @@ import {
   findChangedMarkdownFiles,
   findAllMarkdownFiles,
 } from "../src/utils/fileUtils";
-import { withRetry } from "../src/utils/retry";
+import { retry } from "../src/utils/retry";
 
 async function processMarkdownFiles(): Promise<void> {
   console.log("마크다운 파일 처리 시작...");
@@ -35,7 +35,7 @@ async function processMarkdownFiles(): Promise<void> {
   // 각 파일에 대해 postProcessor 함수 실행 (재시도 로직 포함)
   for (const file of files) {
     try {
-      await withRetry(
+      await retry(
         () => postService(file, supabase),
         `파일 처리 ${file}`,
         3,

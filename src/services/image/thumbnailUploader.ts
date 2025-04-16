@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
-import { withRetry } from "@/utils/retry";
+import { retry } from "@/utils/retry";
 import {
   generateFileHash,
   resolveLocalImagePath,
@@ -32,7 +32,7 @@ export async function deleteOldThumbnail(
   try {
     console.log(`이전 썸네일 삭제 시도: ${storagePath}`);
 
-    await withRetry(
+    await retry(
       async () => {
         const { error } = await supabase.storage
           .from(bucket)

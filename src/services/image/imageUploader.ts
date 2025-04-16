@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/database";
-import { withRetry } from "@/utils/retry";
+import { retry } from "@/utils/retry";
 import {
   getMimeType,
   generateFileHash,
@@ -43,7 +43,7 @@ export async function uploadImageToStorage(
     console.log(`이미지 업로드 시도: ${fileName} (해시: ${fileHash})`);
 
     // Supabase Storage에 업로드 (재시도 로직 포함)
-    await withRetry(
+    await retry(
       async () => {
         const { error } = await supabase.storage
           .from(bucket)
@@ -200,7 +200,7 @@ export async function deleteImagesByUrls(
     if (storagePaths.length === 0) return true;
 
     // 이미지 삭제
-    await withRetry(
+    await retry(
       async () => {
         const { error } = await supabase.storage
           .from(bucket)

@@ -15,7 +15,7 @@ export const sleep = (ms: number): Promise<void> =>
  * @returns 함수 실행 결과 Promise<T>
  * @throws 최종 시도에서 오류 발생 시 해당 오류를 throw
  */
-export async function withRetry<T>(
+export async function retry<T>(
   fn: () => Promise<T>,
   description = "Operation",
   retries = 3,
@@ -37,5 +37,5 @@ export async function withRetry<T>(
     }
   }
   // 이 코드는 도달하지 않습니다.
-  throw new Error("withRetry: unexpected error");
+  throw new Error("retry: unexpected error");
 }
