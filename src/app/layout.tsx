@@ -3,6 +3,7 @@ import "../styles/globals.css";
 import Navbar from "@/components/Navbar";
 import ThemeProvider from "@/components/ThemeProvider";
 import SpaceBackground from "@/components/background/SpaceBackground";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "기술 블로그",
@@ -26,20 +27,22 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <head />
       <body className="min-h-screen transition-colors duration-300">
-        <ThemeProvider>
-          <div className="fixed inset-0 -z-20 overflow-hidden">
-            <SpaceBackground />
-          </div>
-
-          <nav className="w-full backdrop-blur-md shadow-lg fixed top-0 left-0 z-50 p-4 bg-white/20 dark:bg-black/20 border-gray-200">
-            <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6">
-              <Navbar />
+        <Providers>
+          <ThemeProvider>
+            <div className="fixed inset-0 -z-20 overflow-hidden">
+              <SpaceBackground />
             </div>
-          </nav>
-          <main className="max-w-[1800px] w-full mx-auto pt-20 pb-10 flex-grow">
-            {children}
-          </main>
-        </ThemeProvider>
+
+            <nav className="w-full backdrop-blur-md shadow-lg fixed top-0 left-0 z-50 p-4 bg-white/20 dark:bg-black/20 border-gray-200">
+              <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6">
+                <Navbar />
+              </div>
+            </nav>
+            <main className="max-w-[1800px] w-full mx-auto pt-20 pb-10 flex-grow">
+              {children}
+            </main>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

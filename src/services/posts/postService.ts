@@ -8,7 +8,7 @@ import {
   generateValidSlug,
 } from "../../utils/markdownParser";
 import { resetFileToTemplate } from "../../utils/fileReset";
-import { tagService } from "../tagService";
+import { tagService } from "../tags/tagService";
 import {
   uploadContentImages,
   cleanupUnusedImages,

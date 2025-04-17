@@ -4,7 +4,7 @@ import { Database } from "@/types/database";
 const BATCH_SIZE = 5;
 
 /**
- * 태그를 처리하고 포스트-태그 연결을 수행합니다.
+ * 태그를 처리하고 포스트-태그 연결을 수행
  * @param postSlug - 포스트의 슬러그
  * @param tags - 태그 이름 배열
  * @param supabase - Supabase 클라이언트 인스턴스
@@ -42,7 +42,7 @@ export async function tagService(
       await Promise.all(
         tagBatch.map(async (tagName) => {
           try {
-            // 태그 저장: upsert 후, 체인된 .select()로 결과 데이터를 조회합니다.
+            // 태그 저장: upsert 후, 체인된 .select()로 결과 데이터를 조회
             const { data: tagData, error: tagError } = await supabase
               .from("tags")
               .upsert({ name: tagName }, { onConflict: "name" })
@@ -56,7 +56,7 @@ export async function tagService(
 
             const tagId = tagData[0].id;
 
-            // 포스트-태그 연결: 포스트와 태그의 관계를 생성합니다.
+            // 포스트-태그 연결: 포스트와 태그의 관계를 생성
             const { error: linkError } = await supabase
               .from("post_tags")
               .upsert([{ post_id: postId, tag_id: tagId }], {

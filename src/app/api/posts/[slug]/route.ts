@@ -3,7 +3,7 @@ import { getPostBySlug } from "@/lib/posts";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> } // Next.js 내부 타입에 맞게 params를 Promise로 선언
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const resolvedParams = await params;
 

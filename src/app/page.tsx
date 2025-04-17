@@ -1,56 +1,47 @@
-import { getAllPosts } from "@/lib/posts";
-import PostList from "@/components/post/PostList";
+import React from "react";
 import HeroSection from "@/components/hero/HeroSection";
+import { PostsContainer } from "@/components/post/PostsContainer";
+import { FilteredPostList } from "@/components/post/FilteredPostList";
+import { getAllPosts } from "@/lib/posts";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
+import { ClientFilterIndicator } from "@/components/post/ClientFilterIndicator";
 
 export default async function BlogPage() {
-  try {
-    const posts = await getAllPosts();
+  // 서버에서 초기 데이터 페칭
+  const initialPosts = await getAllPosts();
+  const tags = Array.from(
+    new Set(["All", ...initialPosts.flatMap((post) => post.tags ?? [])])
+  );
 
-    if (posts.length === 0) {
-      return (
-        <div className="w-full px-4 sm:px-6">
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              아직 작성된 포스트가 없습니다.
-            </h2>
-            <p className="text-gray-300">나중에 다시 확인해 주세요!</p>
-          </div>
-        </div>
-      );
-    }
+  // QueryClient 생성 및 초기 데이터 설정
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: ["postsByTag", "All"],
+    queryFn: () => initialPosts,
+  });
 
-    const formattedPosts = posts.map((post) => ({
-      slug: post.slug,
-      title: post.frontmatter.title,
-      date: post.frontmatter.date,
-      excerpt: post.frontmatter.excerpt,
-      thumbnail: post.frontmatter.thumbnail,
-      tags: post.frontmatter.tags,
-    }));
+  // 상태 직렬화
+  const dehydratedState = dehydrate(queryClient);
 
-    return (
-      <div className="w-full px-4 sm:px-6">
-        <HeroSection />
-        <div className="mt-10">
-          <PostList posts={formattedPosts} />
+  return (
+    <main className="w-full px-4 sm:px-6">
+      <HeroSection tags={tags} />
+      <section className="mt-10">
+        {/* 서버 컴포넌트 - 초기 렌더링 */}
+        <div id="server-posts">
+          <FilteredPostList tag="All" />
         </div>
-      </div>
-    );
-  } catch (error) {
-    console.error("서버에서 포스트를 가져오는 중 오류 발생:", error);
-    return (
-      <div className="w-full px-4 sm:px-6">
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-bold text-red-500 mb-4">
-            데이터 로드 오류
-          </h2>
-          <p className="text-white">
-            {error instanceof Error
-              ? error.message
-              : "포스트 데이터를 불러오지 못했습니다"}
-          </p>
-        </div>
-      </div>
-    );
-  }
+
+        {/* 클라이언트 필터링 상태 표시 및 서버 컴포넌트 숨김 처리 */}
+        <HydrationBoundary state={dehydratedState}>
+          <ClientFilterIndicator />
+          <PostsContainer initialTag="All" />
+        </HydrationBoundary>
+      </section>
+    </main>
+  );
 }

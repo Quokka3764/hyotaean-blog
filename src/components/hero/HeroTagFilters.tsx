@@ -6,7 +6,7 @@ import { HeroTagFiltersProps } from "./types";
 
 function HeroTagFilters({
   isDark,
-  tags,
+  tags = [],
   selectedTagIndex,
   setSelectedTagIndex,
 }: HeroTagFiltersProps) {

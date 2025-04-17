@@ -1,37 +1,45 @@
-import { PostgrestError } from "@supabase/supabase-js";
+import { cache } from "react";
 import { getSupabaseClient } from "./supabaseClient";
-import { PostWithTags } from "@/types/database";
-// import { cache } from "react";
+import type { PostWithTags } from "@/types/database";
+import type { PostCardProps } from "@/types/posts";
+import { postTransformers } from "@/utils/postTransformers";
+import { PostgrestError } from "@supabase/supabase-js";
 
-// 모든 포스트 정보 가져오기
-export const getAllPosts = async () => {
-  try {
-    const supabase = getSupabaseClient();
+export const getAllPosts = cache(async function getAllPosts(): Promise<
+  PostCardProps[]
+> {
+  const supabase = getSupabaseClient();
+  const { data, error } = (await supabase.rpc("get_all_posts")) as {
+    data: PostWithTags[] | null;
+    error: PostgrestError | null;
+  };
 
-    const { data, error } = (await supabase.rpc("get_all_posts")) as {
-      data: PostWithTags[] | null;
-      error: PostgrestError | null;
-    };
+  if (error) throw error;
 
-    if (error) throw error;
-    if (!data) return [];
+  return postTransformers(data);
+});
 
-    // 원래 형식과 유사하게 데이터 변환
-    return data.map((post) => ({
-      slug: post.slug,
-      frontmatter: {
-        title: post.title,
-        date: post.date,
-        excerpt: post.excerpt || "",
-        thumbnail: post.thumbnail || "",
-        tags: post.tags || [],
-      },
-    }));
-  } catch (error) {
-    console.error("포스트 목록 가져오기 오류:", error);
-    throw error;
+export const getPostsByTagServer = cache(async function getPostsByTagServer(
+  tag: string
+): Promise<PostCardProps[]> {
+  const supabase = getSupabaseClient();
+  let data: PostWithTags[] | null;
+  let error: PostgrestError | null;
+
+  if (tag === "All") {
+    // 모든 포스트를 가져오는 로직 재사용
+    return getAllPosts();
+  } else {
+    ({ data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .contains("tags", [tag]));
   }
-};
+
+  if (error) throw error;
+
+  return postTransformers(data);
+});
 
 // 특정 슬러그의 포스트 정보 가져오기
 export async function getPostBySlug(slug: string) {

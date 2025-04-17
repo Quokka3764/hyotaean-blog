@@ -1,22 +1,17 @@
+import React from "react";
 import HeroSectionClient from "./HeroSectionClient";
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  tags: string[];
+}
+
+export default function HeroSection({ tags }: HeroSectionProps) {
   const taglines = [
     "개발자의 성장 이야기",
     "프로젝트 리뷰",
     "웹 개발 인사이트",
     "알고리즘 문제풀이",
     "기술 트렌드 분석",
-  ];
-
-  const tags = [
-    "All",
-    "JavaScript",
-    "React",
-    "Next.js",
-    "TypeScript",
-    "Algorithm",
-    "Performance",
   ];
 
   return (

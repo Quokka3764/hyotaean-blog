@@ -3,7 +3,7 @@
 import Link from "next/link";
 import PostCardSkeleton from "./PostCardSkeleton";
 import { useTheme } from "next-themes";
-import { useMemo, memo, useRef, useEffect, useState } from "react";
+import { useState, useEffect, useMemo, useRef, memo } from "react";
 
 interface PostCardClientProps {
   slug: string;
@@ -14,24 +14,20 @@ interface PostCardClientProps {
 function PostCardClient({ slug, children }: PostCardClientProps) {
   const { theme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const isDarkMode = (theme === "system" ? systemTheme : theme) === "dark";
+  const cardStyles = useMemo(
+    () =>
+      // useMemo
+      isDarkMode
+        ? "backdrop-blur-sm bg-white/10 text-white"
+        : "group backdrop-blur-sm bg-gray-50 text-gray-800",
+    [isDarkMode]
+  );
 
-  // 클라이언트 사이드에서만 마운트되도록 처리
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // 다크모드
-  const isDarkMode =
-    mounted && (theme === "system" ? systemTheme : theme) === "dark";
-
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  //메모이제이션
-  const cardStyles = useMemo(() => {
-    return isDarkMode
-      ? "backdrop-blur-sm bg-white/10 text-white"
-      : "group backdrop-blur-sm bg-gray-50 text-gray-800";
-  }, [isDarkMode]);
 
   if (!mounted) {
     return <PostCardSkeleton />;
@@ -49,4 +45,5 @@ function PostCardClient({ slug, children }: PostCardClientProps) {
     </div>
   );
 }
+
 export default memo(PostCardClient);
