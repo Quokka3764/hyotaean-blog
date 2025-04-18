@@ -5,20 +5,32 @@ import { usePostsByTag } from "@/hooks/usePostsByTag";
 import { useTagStore } from "@/store/useTagStore";
 import { motion } from "framer-motion";
 import { PostCard } from "./PostCard";
+import type { PostCardProps } from "@/types/posts";
+import PostCardSkeleton from "./PostCardSkeleton";
 
-export function TaggedPostList() {
+interface TaggedPostListProps {
+  initialPosts: PostCardProps[];
+}
+
+export function TaggedPostList({ initialPosts }: TaggedPostListProps) {
   const selectedTag = useTagStore((state) => state.selectedTag);
   const {
     data: posts = [],
     isLoading,
+    isFetching,
     isError,
-  } = usePostsByTag(selectedTag || "All");
+  } = usePostsByTag(selectedTag, initialPosts);
 
-  if (isLoading) {
+  const showSkeleton = isLoading || (isFetching && posts.length === 0);
+
+  if (showSkeleton) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 animate-pulse">
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+                      xl:grid-cols-4 2xl:grid-cols-5 gap-8 animate-pulse"
+      >
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-80 bg-gray-200 rounded-2xl" />
+          <PostCardSkeleton key={i} />
         ))}
       </div>
     );

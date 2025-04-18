@@ -1,20 +1,30 @@
-import React from "react";
+"use client";
+
+import Link from "next/link";
 import Image from "next/image";
-import PostCardClient from "./PostCardClient";
-import type { PostCardProps as BaseProps } from "@/types/posts";
+import { useTheme } from "next-themes";
 import { parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { ko } from "date-fns/locale";
+import type { PostCardProps as BaseProps } from "@/types/posts";
 
 const DEFAULT_IMAGE = "/harpSeal.jpg";
 
 interface PostCardProps {
-  post: BaseProps & { excerpt?: string };
+  post: BaseProps;
   index?: number;
 }
 
 export function PostCard({ post, index = 0 }: PostCardProps) {
+  const { theme, systemTheme } = useTheme();
+  const isDark = (theme === "system" ? systemTheme : theme) === "dark";
+
+  const cardStyles = isDark
+    ? "backdrop-blur-sm bg-white/10 text-white"
+    : "group backdrop-blur-sm bg-gray-50 text-gray-800";
+
   const thumbnail = post.thumbnail || DEFAULT_IMAGE;
+
   const formattedDate = formatInTimeZone(
     parseISO(post.date),
     "Asia/Seoul",
@@ -24,8 +34,14 @@ export function PostCard({ post, index = 0 }: PostCardProps) {
 
   return (
     <div className="h-full w-full">
-      <PostCardClient slug={post.slug} index={index}>
-        <div className="rounded-2xl overflow-hidden h-full flex flex-col">
+      <Link
+        href={`/blog/${post.slug}`}
+        className="block h-full"
+        prefetch={false}
+      >
+        <div
+          className={`${cardStyles} rounded-2xl overflow-hidden h-full flex flex-col transition-colors`}
+        >
           <div
             className="relative w-full overflow-hidden"
             style={{ aspectRatio: "16/9" }}
@@ -36,7 +52,7 @@ export function PostCard({ post, index = 0 }: PostCardProps) {
               fill
               className="object-cover"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              priority
+              priority={index < 3} // Top 3개까지만 priority
               quality={80}
             />
           </div>
@@ -55,7 +71,7 @@ export function PostCard({ post, index = 0 }: PostCardProps) {
             </div>
           </div>
         </div>
-      </PostCardClient>
+      </Link>
     </div>
   );
 }

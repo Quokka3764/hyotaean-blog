@@ -1,35 +1,37 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import type { PostCardProps } from "@/types/posts";
+import { createClient } from "@supabase/supabase-js";
 
 const STALE_TIME = 5 * 60 * 1000;
 
-export interface PostsByTagResponse {
-  posts: PostCardProps[];
+const supa = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! // 브라우저 노출 OK
+);
+
+async function fetchPostsByTag(tag: string, fallback: PostCardProps[] = []) {
+  if (tag === "All") return fallback; // 이미 받은 초기 데이터 재사용
+
+  const { data, error } = await supa.rpc("get_posts_by_tag", { p_tag: tag });
+  if (error) throw error;
+  return data ?? [];
 }
 
-export async function fetchPostsByTag(tag: string): Promise<PostCardProps[]> {
-  // 이미 초기 데이터가 하이드레이션 되어 있으면 API 호출 불필요
-  // 필터링 시에만 새로운 API 호출
-  if (tag === "All") {
-    // 내부 캐시에서 가져오므로 실제 API 호출은 하지 않음
-    return [];
-  }
-
-  const res = await fetch(`/api/posts?tag=${encodeURIComponent(tag)}`);
-  if (!res.ok) {
-    throw new Error(`포스트 조회 실패 (${res.status})`);
-  }
-  const data: PostsByTagResponse = await res.json();
-  return data.posts;
-}
-
-export function usePostsByTag(tag: string) {
-  return useQuery<PostCardProps[], Error>({
+export function usePostsByTag(tag: string, initialPosts?: PostCardProps[]) {
+  const opts: UseQueryOptions<PostCardProps[], Error> = {
     queryKey: ["postsByTag", tag],
-    queryFn: () => fetchPostsByTag(tag),
+    queryFn: () => fetchPostsByTag(tag, initialPosts),
     staleTime: STALE_TIME,
     placeholderData: (prev) => prev,
-  });
+  };
+
+  // All 리스트는 SSR 데이터를 그대로 사용하고 재요청 차단
+  if (tag === "All" && initialPosts) {
+    opts.initialData = initialPosts;
+    opts.enabled = false;
+  }
+
+  return useQuery(opts);
 }

@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTheme } from "next-themes";
+import { useTagStore } from "@/store/useTagStore";
 import HeroMainTitle from "./HeroMainTitle";
 import HeroTagline from "./HeroTagline";
 import HeroDescriptionSearch from "./HeroDescriptionSearch";
 import HeroTagFilters from "./HeroTagFilters";
 import HeroSectionSkeleton from "./HeroSectionSkeleton";
-import { useTagStore } from "@/store/useTagStore";
 
 interface HeroSectionClientProps {
   taglines: string[];
