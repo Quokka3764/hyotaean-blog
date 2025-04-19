@@ -2,14 +2,13 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { HeroTagFiltersProps } from "./types";
+import type { HeroTagFiltersProps } from "./types";
 
-function HeroTagFilters({
-  isDark,
+export default function HeroTagFilters({
   tags = [],
   selectedTagIndex,
   setSelectedTagIndex,
-}: HeroTagFiltersProps) {
+}: Omit<HeroTagFiltersProps, "isDark">) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -17,25 +16,27 @@ function HeroTagFilters({
       transition={{ delay: 0.6, duration: 0.8 }}
       className="flex flex-wrap justify-center gap-2 mb-12"
     >
-      {tags.map((tag, index) => (
-        <motion.button
-          key={tag}
-          onClick={() => setSelectedTagIndex(index)}
-          className={`py-1.5 px-4 text-sm rounded-full transition-all duration-200 shadow-sm ${
-            selectedTagIndex === index
-              ? isDark
-                ? "bg-blue-500 text-white border border-blue-500"
-                : "bg-indigo-600 text-white border border-indigo-600"
-              : isDark
-              ? "border border-blue-500 text-blue-200 hover:bg-blue-500 hover:text-gray-200"
-              : "border border-indigo-600 text-indigo-600 hover:bg-indigo-600 hover:text-gray-200"
-          }`}
-        >
-          {tag}
-        </motion.button>
-      ))}
+      {tags.map((tag, i) => {
+        const isActive = selectedTagIndex === i;
+
+        return (
+          <motion.button
+            key={tag}
+            onClick={() => setSelectedTagIndex(i)}
+            whileTap={{ scale: 0.95 }}
+            className={`
+              py-1.5 px-4 text-sm font-medium rounded-full transition-colors duration-200 shadow-sm
+              ${
+                isActive
+                  ? "bg-indigo-600 text-white border-transparent dark:bg-indigo-500"
+                  : "bg-transparent text-indigo-600 border border-indigo-600 hover:bg-indigo-600 hover:text-white dark:bg-indigo-900/20 dark:text-indigo-200 dark:border-indigo-400 dark:hover:bg-indigo-600 dark:hover:text-white"
+              }
+            `}
+          >
+            {tag}
+          </motion.button>
+        );
+      })}
     </motion.div>
   );
 }
-
-export default React.memo(HeroTagFilters);

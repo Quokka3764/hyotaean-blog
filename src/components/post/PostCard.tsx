@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { ko } from "date-fns/locale";
@@ -16,12 +15,9 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, index = 0 }: PostCardProps) {
-  const { theme, systemTheme } = useTheme();
-  const isDark = (theme === "system" ? systemTheme : theme) === "dark";
-
-  const cardStyles = isDark
-    ? "backdrop-blur-sm bg-white/10 text-white"
-    : "group backdrop-blur-sm bg-gray-50 text-gray-800";
+  const cardStyles =
+    "group backdrop-blur-sm bg-gray-50 text-gray-800 " +
+    "dark:bg-white/10 dark:text-white";
 
   const thumbnail = post.thumbnail || DEFAULT_IMAGE;
 

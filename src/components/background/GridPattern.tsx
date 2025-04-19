@@ -1,5 +1,3 @@
-"use client";
-
 export default function GridPattern() {
   return (
     <div className="absolute inset-0 opacity-10">

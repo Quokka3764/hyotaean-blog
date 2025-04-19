@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { HeroMainTitleClientProps } from "./types";
@@ -9,24 +9,23 @@ function HeroMainTitleClient({
   textContent,
   gradients,
 }: HeroMainTitleClientProps) {
+  // 클라이언트 사이드 마운트 상태 추적
+  const [isMounted, setIsMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+
+  // 클라이언트 사이드에서만 렌더링되도록 설정
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // 기본값은 light 테마로 설정(서버 사이드와 일치시키기 위함)
+  // 클라이언트에서 마운트된 후에만 실제 테마 값 사용
+  const isDark = isMounted ? resolvedTheme === "dark" : false;
 
   // 메인 텍스트에 사용되는 그라데이션
   const mainGradient = useMemo(
     () => (isDark ? gradients.mainDark : gradients.mainLight),
     [isDark, gradients.mainDark, gradients.mainLight]
-  );
-
-  // 글리치 오버레이용 그라데이션
-  const glitchGradient1 = useMemo(
-    () => (isDark ? gradients.glitch1Dark : gradients.glitch1Light),
-    [isDark, gradients.glitch1Dark, gradients.glitch1Light]
-  );
-
-  const glitchGradient2 = useMemo(
-    () => (isDark ? gradients.glitch2Dark : gradients.glitch2Light),
-    [isDark, gradients.glitch2Dark, gradients.glitch2Light]
   );
 
   // 그림자 스타일 계산
@@ -64,39 +63,48 @@ function HeroMainTitleClient({
     [mainGradient, mainShadow, subShadow, textContent]
   );
 
-  // 글리치 효과 JSX 생성
-  const textGlitchJSX1 = useMemo(
-    () => (
-      <div className="font-extrabold text-5xl md:text-7xl tracking-tight">
-        <span
-          className={`bg-clip-text text-transparent ${glitchGradient1}`}
-          style={{ textShadow: mainShadow }}
-        >
-          {textContent.main}
-        </span>
-        <span className="ml-4" style={{ textShadow: subShadow }}>
-          {textContent.sub}
-        </span>
+  // 기본 렌더링 (서버 사이드 및 초기 하이드레이션용)
+  if (!isMounted) {
+    return (
+      <div className="relative py-4 h-24 md:h-32">
+        <h1 className="relative z-10">{textMainJSX}</h1>
       </div>
-    ),
-    [glitchGradient1, mainShadow, subShadow, textContent]
+    );
+  }
+
+  // 이하는 클라이언트 사이드에서만 실행되는 코드
+
+  // 글리치 효과용 그라데이션 (클라이언트에서만 계산)
+  const glitchGradient1 = gradients.glitch1Dark;
+  const glitchGradient2 = gradients.glitch2Dark;
+
+  // 글리치 효과 JSX 생성
+  const textGlitchJSX1 = (
+    <div className="font-extrabold text-5xl md:text-7xl tracking-tight">
+      <span
+        className={`bg-clip-text text-transparent ${glitchGradient1}`}
+        style={{ textShadow: mainShadow }}
+      >
+        {textContent.main}
+      </span>
+      <span className="ml-4" style={{ textShadow: subShadow }}>
+        {textContent.sub}
+      </span>
+    </div>
   );
 
-  const textGlitchJSX2 = useMemo(
-    () => (
-      <div className="font-extrabold text-5xl md:text-7xl tracking-tight">
-        <span
-          className={`bg-clip-text text-transparent ${glitchGradient2}`}
-          style={{ textShadow: mainShadow }}
-        >
-          {textContent.main}
-        </span>
-        <span className="ml-2" style={{ textShadow: subShadow }}>
-          {textContent.sub}
-        </span>
-      </div>
-    ),
-    [glitchGradient2, mainShadow, subShadow, textContent]
+  const textGlitchJSX2 = (
+    <div className="font-extrabold text-5xl md:text-7xl tracking-tight">
+      <span
+        className={`bg-clip-text text-transparent ${glitchGradient2}`}
+        style={{ textShadow: mainShadow }}
+      >
+        {textContent.main}
+      </span>
+      <span className="ml-2" style={{ textShadow: subShadow }}>
+        {textContent.sub}
+      </span>
+    </div>
   );
 
   // 글리치 오버레이 애니메이션 variant
@@ -126,6 +134,7 @@ function HeroMainTitleClient({
     repeatDelay: 7,
   };
 
+  // 클라이언트 사이드 렌더링용 전체 컴포넌트
   return (
     <div className="relative py-4 h-24 md:h-32">
       {/* 글리치 오버레이 1 */}
