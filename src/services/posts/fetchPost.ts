@@ -1,16 +1,14 @@
 import fs from "fs";
 import path from "path";
-import { getPostBySlug } from "@/lib/posts";
+import { supabaseClient } from "@/lib/supabaseClient";
+import type { PostgrestError } from "@supabase/supabase-js";
+import type { PostWithTags } from "@/types/database";
 
-// 로컬 저장 경로 설정
-const postsDirectory = path.join(process.cwd(), "src/contents/posts");
-const editFilePath = path.join(process.cwd(), "src/contents/posts/edit.md");
+// 공통 경로 상수
+export const POSTS_DIR = path.join(process.cwd(), "src/contents/posts");
+export const EDIT_FILE = path.join(POSTS_DIR, "edit.md");
 
-/**
- * buildMarkdownContent
- * - 입력 받은 post 데이터를 기반으로 YAML frontmatter와 본문을 하나의 Markdown 문자열로 구성하기
- * - getPostBySlug가 반환하는 객체의 구조는 { frontmatter: { title, date, excerpt?, thumbnail?, tags? }, content }
- */
+// frontmatter + 본문 합치기
 function buildMarkdownContent(postData: {
   frontmatter: {
     title: string;
@@ -22,7 +20,6 @@ function buildMarkdownContent(postData: {
   content: string;
 }): string {
   const { frontmatter, content } = postData;
-  // 기본값 할당: tags는 undefined일 수 있으므로 빈 배열을 기본값으로 사용하기
   const tags = frontmatter.tags ?? [];
   return `---
 title: "${frontmatter.title}"
@@ -35,11 +32,7 @@ tags: [${tags.map((tag) => `"${tag}"`).join(", ")}]
 ${content}`;
 }
 
-/**
- * saveContent
- * - 지정한 filePath에 content를 저장
- * - 상위 디렉토리가 존재하지 않을 경우 생성
- */
+// 파일 저장
 function saveContent(filePath: string, content: string): void {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -48,51 +41,68 @@ function saveContent(filePath: string, content: string): void {
   fs.writeFileSync(filePath, content);
 }
 
-/**
- * fetchPost
- * - Supabase에서 slug에 해당하는 게시글 데이터를 가져옴
- *   edit.md 파일과 수정하려는 md파일 두군 데에 내용이 불러와짐
- */
+// 기존 .md 파일 삭제 유틸
+function clearOldPosts(
+  directory: string,
+  exclude: string[] = ["edit.md"]
+): void {
+  const files = fs
+    .readdirSync(directory)
+    .filter((f) => f.endsWith(".md") && !exclude.includes(f));
+  for (const file of files) {
+    const full = path.join(directory, file);
+    if (fs.existsSync(full)) {
+      fs.unlinkSync(full);
+      console.log(`기존 파일 삭제: ${full}`);
+    }
+  }
+}
+
+// Supabase에서 단일 포스트 데이터 가져오기 (RPC)
+async function getPostData(slug: string) {
+  const { data, error } = (await supabaseClient.rpc("get_post_by_slug", {
+    post_slug: slug,
+  })) as { data: PostWithTags[] | null; error: PostgrestError | null };
+
+  if (error) throw error;
+  if (!data || data.length === 0) {
+    throw new Error(`${slug} 포스트를 찾을 수 없습니다.`);
+  }
+
+  const post = data[0];
+  return {
+    frontmatter: {
+      title: post.title,
+      date: post.date,
+      excerpt: post.excerpt || "",
+      thumbnail: post.thumbnail || "",
+      tags: post.tags || [],
+    },
+    content: post.content,
+  };
+}
+
+// 실제 파일 생성 흐름
 export async function fetchPost(slug: string): Promise<void> {
   try {
     console.log(`Fetching post "${slug}" from Supabase...`);
 
-    // Supabase에서 게시글 데이터를 가져옴
-    const postData = await getPostBySlug(slug);
-    if (!postData || !postData.content) {
-      console.error(`Error: Post "${slug}" not found or content is missing.`);
-      process.exit(1);
-    }
+    const postData = await getPostData(slug);
+    const markdown = buildMarkdownContent(postData);
 
-    // Markdown 콘텐츠 구성
-    const markdownContent = buildMarkdownContent(postData);
+    // 기존 파일 정리
+    clearOldPosts(POSTS_DIR);
 
-    // 디렉토리 내 md 파일 순회 및 처리
-    const mdFiles = fs
-      .readdirSync(postsDirectory)
-      .filter((file) => file.endsWith(".md") && file !== "edit.md");
+    // 새 파일 저장
+    const postPath = path.join(POSTS_DIR, `${slug}.md`);
+    saveContent(postPath, markdown);
+    console.log(`Post "${slug}" saved to ${postPath}.`);
 
-    // 기존 md 파일 삭제
-    for (const file of mdFiles) {
-      const filePath = path.join(postsDirectory, file);
-
-      // 파일 존재 확인 후 삭제
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log(`기존 파일 삭제: ${filePath}`);
-      }
-    }
-
-    // 새 포스트 파일 저장
-    const postFilePath = path.join(postsDirectory, `${slug}.md`);
-    saveContent(postFilePath, markdownContent);
-    console.log(`Post "${slug}" saved to ${postFilePath}.`);
-
-    // edit.md 에도 저장
-    saveContent(editFilePath, markdownContent);
-    console.log(`Backup for post "${slug}" saved to ${editFilePath}.`);
-  } catch (error) {
-    console.error("An error occurred while fetching the post:", error);
+    // edit.md 백업
+    saveContent(EDIT_FILE, markdown);
+    console.log(`Backup for post "${slug}" saved to ${EDIT_FILE}.`);
+  } catch (err) {
+    console.error("An error occurred while fetching the post:", err);
     process.exit(1);
   }
 }
