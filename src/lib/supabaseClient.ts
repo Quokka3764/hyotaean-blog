@@ -1,5 +1,24 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import * as path from "path";
+import * as fs from "fs";
+
+// 환경변수 로드 로직
+const envPath = path.resolve(process.cwd(), ".env.local");
+if (fs.existsSync(envPath)) {
+  const envContents = fs.readFileSync(envPath, "utf8");
+  envContents.split("\n").forEach((line) => {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      const key = match[1];
+      let value = match[2] || "";
+      value = value.trim().replace(/^(['"])(.+)\1$/, "$2");
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
 
 // 환경 변수 로드
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
