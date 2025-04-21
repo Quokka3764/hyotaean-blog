@@ -1,8 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import MarkdownRender from "@/components/MarkdownRender";
-import { getAllPosts, getPostBySlug } from "@/lib/posts";
 import FadeInContent from "@/components/FadeInContent";
+import { parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+import { ko } from "date-fns/locale";
+import { getAllPosts, getPostBySlug } from "@/lib/posts";
 
 // 정적 경로 생성을 위한 함수
 export async function generateStaticParams() {
@@ -37,7 +40,12 @@ export default async function BlogPostPage({
             {frontmatter.title}
           </h1>
           <p className="text-sm text-gray-500">
-            {new Date(frontmatter.date).toLocaleDateString()}
+            {formatInTimeZone(
+              parseISO(frontmatter.date),
+              "Asia/Seoul",
+              "yyyy년 MM월 dd일",
+              { locale: ko }
+            )}
           </p>
           {frontmatter.tags && (
             <div className="mt-4 flex flex-wrap gap-2">
