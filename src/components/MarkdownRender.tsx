@@ -24,7 +24,10 @@ const CodeComponent: React.FC<CodeComponentProps> = ({
   const isInline = inline || !className || !match;
 
   return isInline ? (
-    <code className="bg-gray-800 px-1 rounded text-sm text-white" {...props}>
+    <code
+      className="bg-gray-700 text-white dark:bg-indigo-600 dark:text-white px-1 py-1 rounded text-sm"
+      {...props}
+    >
       {children}
     </code>
   ) : (

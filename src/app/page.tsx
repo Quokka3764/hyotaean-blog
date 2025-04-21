@@ -4,6 +4,7 @@ import { getAllPosts } from "@/lib/posts";
 import { TaggedPostList } from "@/components/post/TaggedPostList";
 
 export default async function BlogPage() {
+  
   const initialPosts = await getAllPosts();
 
   const tags = Array.from(
