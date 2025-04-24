@@ -1,3 +1,4 @@
+export const dynamic = "force-static";
 import React from "react";
 import Image from "next/image";
 import MarkdownRender from "@/components/MarkdownRender";
