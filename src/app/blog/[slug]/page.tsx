@@ -1,7 +1,7 @@
 export const dynamic = "force-static";
 import React from "react";
 import Image from "next/image";
-import MarkdownRender from "@/components/MarkdownRender";
+import MarkdownRender from "@/components/markdown/MarkdownRender";
 import FadeInContent from "@/components/FadeInContent";
 import { parseISO } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
