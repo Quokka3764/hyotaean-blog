@@ -7,9 +7,9 @@ interface HeroSectionProps {
 
 export default function HeroSection({ tags }: HeroSectionProps) {
   const taglines = [
-    "개발자의 성장 이야기",
+    "개발자 지망생의 이야기",
     "프로젝트 리뷰",
-    "웹 개발 인사이트",
+    "포트폴리오",
     "알고리즘 문제풀이",
     "기술 트렌드 분석",
   ];
