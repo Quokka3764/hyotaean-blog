@@ -8,7 +8,13 @@ export default async function BlogPage() {
   const initialPosts = await getAllPosts();
 
   const tags = Array.from(
-    new Set(["All", ...initialPosts.flatMap((post) => post.tags ?? [])])
+    new Set([
+      "All",
+      "블로그 제작기",
+      "FinalProject",
+      "Algorithm",
+      ...initialPosts.flatMap((post) => post.tags ?? []),
+    ])
   );
 
   return (
