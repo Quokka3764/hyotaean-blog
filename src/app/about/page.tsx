@@ -37,12 +37,6 @@ export default function AboutPage() {
                   className="h-6"
                 />
               </a>
-              {/* 전화번호 */}
-              <img
-                src="https://img.shields.io/badge/Phone-010--8810--3764-4285F4?style=flat-square&logo=google-voice&logoColor=white"
-                alt="Phone"
-                className="h-6"
-              />
               {/* GitHub */}
               <Link
                 href="https://github.com/Quokka3764"
@@ -136,7 +130,7 @@ export default function AboutPage() {
               ],
             },
             {
-              title: "UI & 스타일링",
+              title: "스타일링 & 시각화",
               badges: [
                 {
                   alt: "Tailwind CSS",

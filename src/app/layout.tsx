@@ -8,7 +8,7 @@ import StaticSpaceBackground from "@/components/background/StaticSpaceBackground
 import DynamicSpaceBackground from "@/components/background/DynamicSpaceBackground";
 
 export const metadata: Metadata = {
-  title: "기술 블로그",
+  title: "Hyotaean-Blog",
   description: "개발 및 기술 관련 블로그",
   icons: {
     icon: "/my-favicon.png",
