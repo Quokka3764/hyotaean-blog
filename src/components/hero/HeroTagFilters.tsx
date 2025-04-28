@@ -14,7 +14,7 @@ export default function HeroTagFilters({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6, duration: 0.8 }}
-      className="flex flex-wrap justify-center gap-2 mb-12"
+      className="flex flex-wrap justify-center gap-2"
     >
       {tags.map((tag, i) => {
         const isActive = selectedTagIndex === i;

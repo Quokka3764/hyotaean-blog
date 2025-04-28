@@ -9,7 +9,7 @@ import DynamicSpaceBackground from "@/components/background/DynamicSpaceBackgrou
 
 export const metadata: Metadata = {
   title: "Hyotaean-Blog",
-  description: "개발 및 기술 관련 블로그",
+  description: "프론트엔드 개발 및 기술 관련 블로그",
   icons: {
     icon: "/my-favicon.png",
   },
@@ -42,11 +42,11 @@ export default async function RootLayout({
               <DynamicSpaceBackground />
             </div>
             <nav className="w-full backdrop-blur-md shadow-lg fixed top-0 left-0 z-50 p-4 bg-white/20 dark:bg-black/20 border-gray-200">
-              <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6">
+              <div className="max-w-[1440px] w-full mx-auto px-4 sm:px-6">
                 <Navbar />
               </div>
             </nav>
-            <main className="max-w-[1800px] w-full mx-auto pt-20 pb-10 flex-grow">
+            <main className="max-w-[1440px] w-full mx-auto pt-20 pb-10 flex-grow">
               {children}
             </main>
           </ThemeProvider>
