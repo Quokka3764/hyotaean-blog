@@ -36,7 +36,7 @@ export function PostCard({ post, index = 0 }: PostCardProps) {
         prefetch={false}
       >
         <div
-          className={`${cardStyles} rounded-2xl overflow-hidden h-full flex flex-col transition-colors`}
+          className={`${cardStyles} rounded-2xl overflow-hidden h-full flex flex-col transition-colors border border-gray-200 dark:border-none`}
         >
           <div
             className="relative w-full overflow-hidden"
