@@ -8,10 +8,31 @@ import StaticSpaceBackground from "@/components/background/StaticSpaceBackground
 import DynamicSpaceBackground from "@/components/background/DynamicSpaceBackground";
 
 export const metadata: Metadata = {
-  title: "Hyotaean-Blog",
+  title: {
+    default: "Hyotaean-Blog",
+    template: "%s | Hyotaean-Blog",
+  },
   description: "프론트엔드 개발 및 기술 관련 블로그",
   icons: {
     icon: "/my-favicon.png",
+    shortcut: "/my-favicon.png",
+    apple: "/my-favicon.png",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
+  metadataBase: new URL("https://hyotaean.dev"),
+  alternates: {
+    canonical: "/",
   },
 };
 
